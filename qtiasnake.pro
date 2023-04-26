@@ -14,14 +14,16 @@ SOURCES += \
     mainwindow.cpp \
     neurone.cpp \
     reseau.cpp \
-    reseauwidget.cpp
+    reseauwidget.cpp \
+    snakewidget.cpp
 
 HEADERS += \
     couche.h \
     mainwindow.h \
     neurone.h \
     reseau.h \
-    reseauwidget.h
+    reseauwidget.h \
+    snakewidget.h
 
 FORMS += \
     mainwindow.ui

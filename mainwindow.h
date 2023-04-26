@@ -12,6 +12,7 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-private:
+private slots:
+    void on_pbStart_clicked();
 };
 #endif // MAINWINDOW_H
