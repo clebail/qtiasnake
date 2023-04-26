@@ -2,6 +2,7 @@
 
 class Reseau {
 public:
+    Reseau();
     Reseau(const Couche& couche);
     Reseau(const QList<Couche>& couches);
     bool addCouche(const Couche& couche);

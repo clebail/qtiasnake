@@ -1,5 +1,8 @@
 #include "reseau.h"
 
+Reseau::Reseau() {
+}
+
 Reseau::Reseau(const Couche& couche) {
     couches.append(couche);
 }
