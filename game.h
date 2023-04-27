@@ -13,7 +13,7 @@ public:
     const QList<QPoint>& getSnake() const;
     const QList<QPoint>& getSensors() const;
     const QPoint& getPasteque() const;
-    void step(int incX, int incY);
+    bool step(int incX, int incY);
 private:
     int largeur;
     int hauteur;
@@ -21,7 +21,7 @@ private:
     QList<QPoint> sensors;
     QPoint pasteque;
 
-    bool cellFree(const QPoint& p) const;
+    bool cellFree(const QPoint& p, bool ignoreFood = false) const;
     void calculSensors();
     QPoint getFirstCellOccupe(int incX, int incY) const;
 };

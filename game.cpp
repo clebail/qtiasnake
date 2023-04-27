@@ -5,6 +5,9 @@ Game::Game(int largeur, int hauteur) {
     this->hauteur = hauteur;
 
     snake.append(QPoint(5, 5));
+    snake.append(QPoint(5, 6));
+    snake.append(QPoint(6, 6));
+    snake.append(QPoint(7, 6));
 
     pasteque = QPoint(7, 3);
 
@@ -31,14 +34,34 @@ const QPoint& Game::getPasteque() const {
     return pasteque;
 }
 
-void Game::step(int incX, int incY) {
+bool Game::step(int incX, int incY) {
+    int i;
+    QPoint last = snake.last();
+
+    for(i=snake.size()-1;i>=1;i--) {
+        snake[i].setX(snake[i-1].x());
+        snake[i].setY(snake[i-1].y());
+    }
+
     snake[0].setX(snake[0].x() + incX);
     snake[0].setY(snake[0].y() + incY);
 
+    if(!cellFree(snake[0])) {
+        if(snake[0] == pasteque) {
+            snake.append(last);
+
+            do {
+                pasteque = QPoint(rand() % (largeur - 2) + 1, rand() % (hauteur - 2) + 1);
+            }while (!cellFree(pasteque, true));
+
+        }
+    }
+
     calculSensors();
+    return true;
 }
 
-bool Game::cellFree(const QPoint& p) const {
+bool Game::cellFree(const QPoint& p, bool ignoreFood) const {
     int x = p.x();
     int y= p.y();
 
@@ -51,7 +74,7 @@ bool Game::cellFree(const QPoint& p) const {
             }
         }
 
-        return pasteque.x() != x || pasteque.y() != y;
+        return ignoreFood ? true : pasteque.x() != x || pasteque.y() != y;
     }
 
     return false;
