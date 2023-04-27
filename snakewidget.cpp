@@ -75,7 +75,7 @@ void SnakeWidget::drawGame(QPainter *painter) {
         painter->drawRect(QRectF(pasteque.x() * caseWidth, pasteque.y() * caseHeight, caseWidth, caseHeight));
     }
 
-    if(!tete.isNull()) {
+    if(!tete.isNull() && this->sensors && sensors.size()) {
         int caseWidth2 = caseWidth / 2;
         int caseHeight2 = caseHeight / 2;
         int startX = tete.x() * caseWidth + caseWidth2;

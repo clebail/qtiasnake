@@ -17,12 +17,12 @@ Couche::Couche(QList<QList<float> > poids) {
     }
 }
 
-QList<float> Couche::eval(const QList<float>& entrees) const {
+QList<float> Couche::eval(const QList<float>& entrees) {
     QList<float> result;
-    QList<Neurone>::const_iterator i;
-    
-    for(i=neurones.begin();i!=neurones.end();++i) {
-        result.append((*i).eval(entrees));
+
+    for(int i=0;i<neurones.size();i++) {
+        neurones[i].eval(entrees);
+        result.append(neurones[i].getValue());
     }
     
     return result;
@@ -38,4 +38,14 @@ int Couche::getNbSortie() const {
 
 int Couche::getNbEntree() const {
     return nbEntree;
+}
+
+QList<float> Couche::getSorties() const {
+    QList<float> values;
+
+    for(int i=0;i<neurones.size();i++) {
+        values.append(neurones[i].getValue());
+    }
+
+    return values;
 }

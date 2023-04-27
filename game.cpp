@@ -1,11 +1,14 @@
 #include <QtDebug>
+#include <math.h>
 #include "game.h"
 
 Game::Game(int largeur, int hauteur) {
     this->largeur = largeur;
     this->hauteur = hauteur;
 
-    snake.append(QPoint(5, 5));
+    diagonale = sqrt(largeur * largeur + hauteur * hauteur);
+
+    snake.append(QPoint(largeur/2, hauteur/2));
     nbMouvement = totMouvement = 0;
 
     incY = -1;
@@ -14,6 +17,8 @@ Game::Game(int largeur, int hauteur) {
     newPasteque();
 
     calculSensors();
+
+    initReseau();
 }
 
 int Game::getLargeur() {
@@ -90,6 +95,13 @@ int Game::getIncY() const {
     return incY;
 }
 
+const Reseau& Game::getReseau() const {
+    return reseau;
+}
+
+void Game::setReseau(const Reseau& reseau) {
+    this->reseau = reseau;
+}
 
 Sensor::ESensorType Game::cellFree(const QPoint& p, bool ignoreFood) const {
     int x = p.x();
@@ -144,6 +156,21 @@ void Game::newPasteque() {
 }
 
 void Game::next() {
+    QList<float> entrees;
+    QList<float> sorties = reseau.getSorties();
+    // QPoint tete = snake[0];
+
+    for(int i=0;i<sensors.size();i++) {
+        entrees.append(0.0);
+        entrees.append(sensors[0].getType() == Sensor::estPasteque ? 1.0 : 0.0);
+    }
+    entrees.append(sorties[0]);
+    entrees.append(sorties[1]);
+    entrees.append(sorties[2]);
+    entrees.append(sorties[3]);
+
+    reseau.eval(entrees);
+
     if(snake[0].y() == 1 && incY == -1) {
         incX = 1;
         incY = 0;
@@ -163,4 +190,11 @@ void Game::next() {
         incX = 0;
         incY = -1;
     }
+}
+
+void Game::initReseau() {
+    reseau.addCouche(Couche(20,16));
+    reseau.addCouche(Couche(16,12));
+    reseau.addCouche(Couche(12,8));
+    reseau.addCouche(Couche(8,4));
 }

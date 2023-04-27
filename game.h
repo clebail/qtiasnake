@@ -4,6 +4,7 @@
 #include <QList>
 #include <QPoint>
 #include "sensor.h"
+#include "reseau.h"
 
 class Game {
 public:
@@ -17,6 +18,8 @@ public:
     int getNbMouvement() const;
     int getIncX() const;
     int getIncY() const;
+    const Reseau& getReseau() const;
+    void setReseau(const Reseau& reseau);
 private:
     int largeur;
     int hauteur;
@@ -27,12 +30,15 @@ private:
     int totMouvement;
     int incX;
     int incY;
+    Reseau reseau;
+    float diagonale;
 
     Sensor::ESensorType cellFree(const QPoint& p, bool ignoreFood = false) const;
     void calculSensors();
     Sensor getFirstCellOccupe(int incX, int incY) const;
     void newPasteque();
     void next();
+    void initReseau();
 };
 
 #endif // GAME_H

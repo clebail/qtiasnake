@@ -1,3 +1,4 @@
+#include <QtDebug>
 #include "reseauwidget.h"
 
 ReseauWidget::ReseauWidget(QWidget *parent) : QWidget{parent} {
@@ -20,9 +21,30 @@ void ReseauWidget::paintEvent(QPaintEvent *) {
 
 void ReseauWidget::drawReseau(QPainter *painter) {
     QList<Couche> couches = reseau.getCouches();
-    QList<Couche>::const_iterator i;
+    if(couches.size()) {
+        QList<Couche>::const_iterator c;
+        int i;
+        int coucheWidth = width() / couches.size();
 
-    for(i=couches.begin();i!=couches.end();++i) {
+        painter->setPen(QColorConstants::Black);
+        for(i=0,c=couches.begin();c!=couches.end();++c, i++) {
+            Couche couche = *c;
+            QList<Neurone> neurones = couche.getNeurones();
 
+            if(neurones.size()) {
+                QList<Neurone>::const_iterator n;
+                int x = i * coucheWidth + coucheWidth / 2;
+                int j;
+                int neuroneHeight = height() / neurones.size();
+
+                for(j=0, n=neurones.begin();n!=neurones.end();++n, j++) {
+                    Neurone neurone = *n;
+                    int y = j * neuroneHeight + neuroneHeight / 2;
+
+                    painter->setBrush(neurone.getValue() >= 0.5 ? QColorConstants::DarkGreen : QColorConstants::White);
+                    painter->drawEllipse(x, y, 10, 10);
+                }
+            }
+        }
     }
 }

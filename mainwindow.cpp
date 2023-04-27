@@ -3,8 +3,9 @@
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     setupUi(this);
 
-    game = Game(20, 20);
+    game = Game(21, 21);
     gameWidget->setGame(game);
+    reseauWidget->setReseau(game.getReseau());
 }
 
 MainWindow::~MainWindow() {
@@ -13,6 +14,7 @@ MainWindow::~MainWindow() {
 void MainWindow::on_pbStep_clicked() {
     if(game.step()) {
         gameWidget->setGame(game);
+        reseauWidget->setReseau(game.getReseau());
 
         lblMvt->setText(QString().number(game.getNbMouvement()));
     }

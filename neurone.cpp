@@ -1,3 +1,4 @@
+#include <QtDebug>
 #include <math.h>
 #include "neurone.h"
 
@@ -13,15 +14,19 @@ Neurone::Neurone(const QList<float>& poids) {
     this->poids = QList<float>(poids);
 }
 
-float Neurone::eval(const QList<float>& entree) const {
+void Neurone::eval(const QList<float>& entree) {
     float sum = 0;
     for(int i=0;i<nbEntree;i++) {
         sum += entree.at(i) * poids.at(i);
     }
     
-    return 1.0 / (1.0 + exp(-sum));
+    value = 1.0 / (1.0 + exp(-sum));
 }
 
 QList<float> Neurone::getPoids() const {
     return poids;
+}
+
+float Neurone::getValue() const {
+    return value;
 }

@@ -12,23 +12,27 @@ Reseau::Reseau(const QList<Couche>& couches) {
 }
 
 bool Reseau::addCouche(const Couche& couche) {
-    Couche last = couches.last();
-    
-    if(last.getNbSortie() == couche.getNbEntree()) {
-        couches.append(couche);
-        
-        return true;
+    if(couches.size()) {
+        Couche last = couches.last();
+
+        if(last.getNbSortie() == couche.getNbEntree()) {
+            couches.append(couche);
+
+            return true;
+        }
+
+        return false;
     }
-    
-    return false;
+
+    couches.append(couche);
+    return true;
 }
 
-QList<float> Reseau::eval(const QList<float>& entrees) const {
+QList<float> Reseau::eval(const QList<float>& entrees) {
     QList<float> es = entrees;
-    QList<Couche>::const_iterator i;
-    
-    for(i=couches.begin();i!=couches.end();++i) {
-        es = (*i).eval(es);
+
+    for(int i=0;i<couches.size();i++) {
+        es = couches[i].eval(es);
     }
     
     return es;
@@ -36,4 +40,10 @@ QList<float> Reseau::eval(const QList<float>& entrees) const {
 
 QList<Couche> Reseau::getCouches() const {
     return couches;
+}
+
+QList<float> Reseau::getSorties() const {
+    Couche couche=couches.last();
+
+    return couche.getSorties();
 }
