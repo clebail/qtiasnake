@@ -12,7 +12,12 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+private:
+    Game game;
 private slots:
-    void on_pbStart_clicked();
+    void on_pbXp_clicked();
+    void on_pbXm_clicked();
+    void on_pbYp_clicked();
+    void on_pbYm_clicked();
 };
 #endif // MAINWINDOW_H

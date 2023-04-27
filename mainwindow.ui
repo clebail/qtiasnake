@@ -50,9 +50,30 @@
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_2">
           <item>
-           <widget class="QPushButton" name="pbStart">
+           <widget class="QPushButton" name="pbXp">
             <property name="text">
-             <string>start</string>
+             <string>X +</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pbXm">
+            <property name="text">
+             <string>X -</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pbYp">
+            <property name="text">
+             <string>Y +</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pbYm">
+            <property name="text">
+             <string>Y -</string>
             </property>
            </widget>
           </item>
