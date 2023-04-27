@@ -4,8 +4,7 @@
 #include <QList>
 #include <QPoint>
 
-class Game
-{
+class Game {
 public:
     Game(int largeur = 12, int hauteur = 12);
     int getLargeur();

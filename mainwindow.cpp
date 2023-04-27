@@ -3,6 +3,7 @@
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     setupUi(this);
 
+    game = Game(20, 20);
     gameWidget->setGame(game);
 }
 
