@@ -3,6 +3,7 @@
 
 #include <QList>
 #include <QPoint>
+#include "sensor.h"
 
 class Game {
 public:
@@ -10,19 +11,28 @@ public:
     int getLargeur();
     int getHauteur();
     const QList<QPoint>& getSnake() const;
-    const QList<QPoint>& getSensors() const;
+    const QList<Sensor> &getSensors() const;
     const QPoint& getPasteque() const;
-    bool step(int incX, int incY);
+    bool step();
+    int getNbMouvement() const;
+    int getIncX() const;
+    int getIncY() const;
 private:
     int largeur;
     int hauteur;
     QList<QPoint> snake;
-    QList<QPoint> sensors;
+    QList<Sensor> sensors;
     QPoint pasteque;
+    int nbMouvement;
+    int totMouvement;
+    int incX;
+    int incY;
 
-    bool cellFree(const QPoint& p, bool ignoreFood = false) const;
+    Sensor::ESensorType cellFree(const QPoint& p, bool ignoreFood = false) const;
     void calculSensors();
-    QPoint getFirstCellOccupe(int incX, int incY) const;
+    Sensor getFirstCellOccupe(int incX, int incY) const;
+    void newPasteque();
+    void next();
 };
 
 #endif // GAME_H

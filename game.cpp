@@ -1,3 +1,4 @@
+#include <QtDebug>
 #include "game.h"
 
 Game::Game(int largeur, int hauteur) {
@@ -5,11 +6,12 @@ Game::Game(int largeur, int hauteur) {
     this->hauteur = hauteur;
 
     snake.append(QPoint(5, 5));
-    snake.append(QPoint(5, 6));
-    snake.append(QPoint(6, 6));
-    snake.append(QPoint(7, 6));
+    nbMouvement = totMouvement = 0;
 
-    pasteque = QPoint(7, 3);
+    incY = -1;
+    incX = 0;
+
+    newPasteque();
 
     calculSensors();
 }
@@ -26,7 +28,7 @@ const QList<QPoint>& Game::getSnake() const {
     return snake;
 }
 
-const QList<QPoint>&  Game::getSensors() const {
+const QList<Sensor>&  Game::getSensors() const {
     return sensors;
 }
 
@@ -34,50 +36,78 @@ const QPoint& Game::getPasteque() const {
     return pasteque;
 }
 
-bool Game::step(int incX, int incY) {
+bool Game::step() {
     int i;
     QPoint last = snake.last();
+    QPoint newTete;
+    Sensor::ESensorType type;
 
-    for(i=snake.size()-1;i>=1;i--) {
-        snake[i].setX(snake[i-1].x());
-        snake[i].setY(snake[i-1].y());
-    }
+    newTete.setX(snake[0].x() + incX);
+    newTete.setY(snake[0].y() + incY);
 
-    snake[0].setX(snake[0].x() + incX);
-    snake[0].setY(snake[0].y() + incY);
+    type = cellFree(newTete);
+    if(type != Sensor::estMur && type != Sensor::estSnake)
+    {
+        for(i=snake.size()-1;i>=1;i--) {
+            snake[i].setX(snake[i-1].x());
+            snake[i].setY(snake[i-1].y());
+        }
 
-    if(!cellFree(snake[0])) {
-        if(snake[0] == pasteque) {
+        snake[0] = newTete;
+        nbMouvement++;
+        totMouvement++;
+
+        if(type == Sensor::estPasteque) {
             snake.append(last);
 
-            do {
-                pasteque = QPoint(rand() % (largeur - 2) + 1, rand() % (hauteur - 2) + 1);
-            }while (!cellFree(pasteque, true));
-
+            newPasteque();
+            nbMouvement = 0;
         }
+
+        if(nbMouvement == 100) {
+            return false;
+        }
+
+        calculSensors();
+        next();
+
+        return true;
+
     }
 
-    calculSensors();
-    return true;
+    return false;
 }
 
-bool Game::cellFree(const QPoint& p, bool ignoreFood) const {
+int Game::getNbMouvement() const {
+    return totMouvement;
+}
+
+int Game::getIncX() const {
+    return incX;
+}
+
+int Game::getIncY() const {
+    return incY;
+}
+
+
+Sensor::ESensorType Game::cellFree(const QPoint& p, bool ignoreFood) const {
     int x = p.x();
-    int y= p.y();
+    int y = p.y();
 
     if(x > 0 && x < largeur - 1 && y > 0 && y < hauteur - 1) {
         QList<QPoint>::const_iterator i;
 
         for(i=snake.begin();i!=snake.end();++i) {
             if((*i).x() == x && (*i).y() == y) {
-                return false;
+                return Sensor::estSnake;
             }
         }
 
-        return ignoreFood ? true : pasteque.x() != x || pasteque.y() != y;
+        return !ignoreFood && p == pasteque ? Sensor::estPasteque : Sensor::estNone;
     }
 
-    return false;
+    return Sensor::estMur;
 }
 
 void Game::calculSensors() {
@@ -93,16 +123,44 @@ void Game::calculSensors() {
     sensors.append(getFirstCellOccupe(1, 1));
 }
 
-QPoint Game::getFirstCellOccupe(int incX, int incY) const {
+Sensor Game::getFirstCellOccupe(int incX, int incY) const {
     QPoint tete = snake.at(0);
     QPoint p;
+    Sensor::ESensorType type;
 
     // en haut à gauche
     p = QPoint(tete.x() + incX, tete.y() +incY);
-    while(cellFree(p)) {
+    while((type = cellFree(p)) == Sensor::estNone) {
        p = QPoint(p.x() + incX, p.y() +incY);
     }
 
-    return p;
+    return Sensor(p, type);
 }
 
+void Game::newPasteque() {
+    do {
+        pasteque = QPoint(rand() % (largeur - 2) + 1, rand() % (hauteur - 2) + 1);
+    }while (cellFree(pasteque, true) != Sensor::estNone);
+}
+
+void Game::next() {
+    if(snake[0].y() == 1 && incY == -1) {
+        incX = 1;
+        incY = 0;
+    }
+
+    if(snake[0].x() == largeur - 2 && incX == 1) {
+        incX = 0;
+        incY = 1;
+    }
+
+    if(snake[0].y() == hauteur - 2 && incY == 1) {
+        incX = -1;
+        incY = 0;
+    }
+
+    if(snake[0].x() == 1 && incX == -1) {
+        incX = 0;
+        incY = -1;
+    }
+}

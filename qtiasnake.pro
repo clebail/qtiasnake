@@ -16,6 +16,7 @@ SOURCES += \
     neurone.cpp \
     reseau.cpp \
     reseauwidget.cpp \
+    sensor.cpp \
     snakewidget.cpp
 
 HEADERS += \
@@ -25,6 +26,7 @@ HEADERS += \
     neurone.h \
     reseau.h \
     reseauwidget.h \
+    sensor.h \
     snakewidget.h
 
 FORMS += \

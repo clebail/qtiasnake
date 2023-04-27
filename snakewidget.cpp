@@ -1,11 +1,4 @@
-#include <math.h>
 #include "snakewidget.h"
-
-#ifndef PI
-    #define PI ((float)3.14159)
-#endif
-
-#define PI4 ((float)PI/4.0)
 
 SnakeWidget::SnakeWidget(QWidget *parent) : QWidget(parent) {
    sensors = true;
@@ -39,7 +32,7 @@ void SnakeWidget::drawGame(QPainter *painter) {
     float caseWidth = (float)width() / (float)largeur;
     float caseHeight = (float)height() / (float)hauteur;
     QList<QPoint> snake = game.getSnake();
-    QList<QPoint> sensors = game.getSensors();
+    QList<Sensor> sensors = game.getSensors();
     QPoint pasteque = game.getPasteque();
     QList<QPoint>::const_iterator i;
     QPoint tete;
@@ -88,10 +81,11 @@ void SnakeWidget::drawGame(QPainter *painter) {
         int startX = tete.x() * caseWidth + caseWidth2;
         int startY =tete.y() * caseHeight + caseHeight2;
         QPoint start(startX, startY);
+        QList<Sensor>::const_iterator i;
 
         painter->setPen(QColorConstants::Blue);
         for(i=sensors.begin();i!=sensors.end();++i) {
-            QPoint p((*i).x() * caseWidth + caseWidth2, (*i).y() * caseHeight + caseHeight2);
+            QPoint p((*i).getPoint().x() * caseWidth + caseWidth2, (*i).getPoint().y() * caseHeight + caseHeight2);
 
             painter->drawLine(start, p);
         }

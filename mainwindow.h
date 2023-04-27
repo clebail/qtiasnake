@@ -15,9 +15,6 @@ public:
 private:
     Game game;
 private slots:
-    void on_pbXp_clicked();
-    void on_pbXm_clicked();
-    void on_pbYp_clicked();
-    void on_pbYm_clicked();
+    void on_pbStep_clicked();
 };
 #endif // MAINWINDOW_H
