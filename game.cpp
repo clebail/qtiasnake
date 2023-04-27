@@ -158,37 +158,56 @@ void Game::newPasteque() {
 void Game::next() {
     QList<float> entrees;
     QList<float> sorties = reseau.getSorties();
-    // QPoint tete = snake[0];
+    QPoint tete = snake[0];
 
     for(int i=0;i<sensors.size();i++) {
-        entrees.append(0.0);
-        entrees.append(sensors[0].getType() == Sensor::estPasteque ? 1.0 : 0.0);
+        Sensor sensor = sensors[i];
+        float dist;
+        if(tete.x() != sensor.getPoint().x()) {
+            if(tete.y() !=  sensor.getPoint().y()) {
+                float x = tete.x() - sensor.getPoint().x();
+                float y = tete.y() - sensor.getPoint().y();
+                dist = sqrt(x * x + y * y) / diagonale;
+            } else {
+                dist = abs(tete.x() - sensor.getPoint().x()) / (float)largeur;
+            }
+        } else {
+            dist = abs(tete.y() - sensor.getPoint().y()) / (float)hauteur;
+        }
+
+        entrees.append(dist / diagonale);
+        entrees.append(sensor.getType() == Sensor::estPasteque ? 1.0 : 0.0);
     }
     entrees.append(sorties[0]);
     entrees.append(sorties[1]);
     entrees.append(sorties[2]);
     entrees.append(sorties[3]);
 
-    reseau.eval(entrees);
+    sorties = reseau.eval(entrees);
 
-    if(snake[0].y() == 1 && incY == -1) {
-        incX = 1;
-        incY = 0;
-    }
+    for(int i=0;i<sorties.size();i++) {
+        if(sorties[i] >= 0.5) {
+            switch(i) {
+                case 0:
+                    incX = 0;
+                    incY = -1;
+                break;
+                case 1:
+                    incX = 1;
+                    incY = 0;
+                break;
+                case 2:
+                    incX = 0;
+                    incY = 1;
+                break;
+                case 3:
+                    incX = -1;
+                    incY = 0;
+                break;
+            }
 
-    if(snake[0].x() == largeur - 2 && incX == 1) {
-        incX = 0;
-        incY = 1;
-    }
-
-    if(snake[0].y() == hauteur - 2 && incY == 1) {
-        incX = -1;
-        incY = 0;
-    }
-
-    if(snake[0].x() == 1 && incX == -1) {
-        incX = 0;
-        incY = -1;
+            return;
+        }
     }
 }
 

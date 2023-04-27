@@ -17,5 +17,9 @@ void MainWindow::on_pbStep_clicked() {
         reseauWidget->setReseau(game.getReseau());
 
         lblMvt->setText(QString().number(game.getNbMouvement()));
+    } else {
+        game = Game(21, 21);
+        gameWidget->setGame(game);
+        reseauWidget->setReseau(game.getReseau());
     }
 }
