@@ -3,14 +3,14 @@
 
 #include <QWidget>
 #include <QPainter>
+#include "game.h"
 
 class SnakeWidget : public QWidget
 {
     Q_OBJECT
 public:
     explicit SnakeWidget(QWidget *parent = nullptr);
-    void setDims(int largeur, int hauteur);
-    void setSnake(const QList<QPoint>& snake);
+    void setGame(const Game& game);
     void setPasteque(const QPoint& pasteque);
     void showSensors(bool sensors);
 
@@ -18,9 +18,7 @@ protected:
     virtual void paintEvent(QPaintEvent *);
 
 private:
-    int largeur, hauteur;
-    QList<QPoint> snake;
-    QPoint pasteque;
+    Game game;
     bool sensors;
 
     void drawGame(QPainter *painter);

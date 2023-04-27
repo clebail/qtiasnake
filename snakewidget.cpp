@@ -8,25 +8,11 @@
 #define PI4 ((float)PI/4.0)
 
 SnakeWidget::SnakeWidget(QWidget *parent) : QWidget(parent) {
-    largeur = 12;
-    hauteur = 12;
-    sensors = true;
+   sensors = true;
 }
 
-void SnakeWidget::setDims(int largeur, int hauteur) {
-    this->largeur = largeur;
-    this->hauteur = hauteur;
-
-    repaint();
-}
-
-void SnakeWidget::setSnake(const QList<QPoint>& snake) {
-    this->snake = snake;
-    repaint();
-}
-
-void SnakeWidget::setPasteque(const QPoint& pasteque) {
-    this->pasteque = pasteque;
+void SnakeWidget::setGame(const Game& game) {
+    this->game = game;
     repaint();
 }
 
@@ -48,10 +34,15 @@ void SnakeWidget::paintEvent(QPaintEvent *) {
 }
 
 void SnakeWidget::drawGame(QPainter *painter) {
+    int largeur = game.getLargeur();
+    int hauteur = game.getHauteur();
     float caseWidth = (float)width() / (float)largeur;
     float caseHeight = (float)height() / (float)hauteur;
+    QList<QPoint> snake = game.getSnake();
+    QPoint pasteque = game.getPasteque();
     QList<QPoint>::const_iterator i;
     QPoint tete;
+
 
     painter->setPen(QColorConstants::Black);
     for(int x=0;x<largeur;x++) {

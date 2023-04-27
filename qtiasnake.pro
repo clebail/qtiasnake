@@ -10,6 +10,7 @@ CONFIG += c++11
 
 SOURCES += \
     couche.cpp \
+    game.cpp \
     main.cpp \
     mainwindow.cpp \
     neurone.cpp \
@@ -19,6 +20,7 @@ SOURCES += \
 
 HEADERS += \
     couche.h \
+    game.h \
     mainwindow.h \
     neurone.h \
     reseau.h \
