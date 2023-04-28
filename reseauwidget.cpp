@@ -1,6 +1,9 @@
 #include <QtDebug>
 #include "reseauwidget.h"
 
+#define DIAM            20
+#define RAYON           (DIAM / 2)
+
 ReseauWidget::ReseauWidget(QWidget *parent) : QWidget{parent} {
 }
 
@@ -24,7 +27,7 @@ void ReseauWidget::drawReseau(QPainter *painter) {
     if(couches.size()) {
         QList<Couche>::const_iterator c;
         int i;
-        int coucheWidth = width() / couches.size();
+        int coucheWidth = width() / (couches.size() + 1);
 
         painter->setPen(QColorConstants::Black);
         for(i=0,c=couches.begin();c!=couches.end();++c, i++) {
@@ -33,16 +36,16 @@ void ReseauWidget::drawReseau(QPainter *painter) {
 
             if(neurones.size()) {
                 QList<Neurone>::const_iterator n;
-                int x = i * coucheWidth + coucheWidth / 2;
+                int x = i * coucheWidth + coucheWidth - RAYON;
                 int j;
-                int neuroneHeight = height() / neurones.size();
+                float neuroneHeight = height() / (neurones.size() + 1);
 
                 for(j=0, n=neurones.begin();n!=neurones.end();++n, j++) {
                     Neurone neurone = *n;
-                    int y = j * neuroneHeight + neuroneHeight / 2;
+                    int y = j * neuroneHeight + neuroneHeight - RAYON;
 
                     painter->setBrush(neurone.getValue() >= 0.5 ? QColorConstants::DarkGreen : QColorConstants::White);
-                    painter->drawEllipse(x, y, 10, 10);
+                    painter->drawEllipse(x, y, DIAM, DIAM);
                 }
             }
         }

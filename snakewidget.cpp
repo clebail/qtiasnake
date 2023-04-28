@@ -36,7 +36,9 @@ void SnakeWidget::drawGame(QPainter *painter) {
     QPoint pasteque = game.getPasteque();
     QList<QPoint>::const_iterator i;
     QPoint tete;
-
+    int diam = qMin(caseHeight, caseWidth) - 2;
+    int dX = (caseWidth - diam) / 2;
+    int dY = (caseHeight - diam) / 2;
 
     painter->setPen(QColorConstants::Black);
     for(int x=0;x<largeur;x++) {
@@ -63,7 +65,7 @@ void SnakeWidget::drawGame(QPainter *painter) {
         painter->setPen(pColor);
         painter->setBrush(bColor);
 
-        painter->drawRect(QRectF(p.x() * caseWidth, p.y() * caseHeight, caseWidth, caseHeight));
+        painter->drawEllipse(p.x() * caseWidth + dX , p.y() * caseHeight + dY, diam, diam);
     }
 
     if(!pasteque.isNull()) {
@@ -72,7 +74,7 @@ void SnakeWidget::drawGame(QPainter *painter) {
         painter->setPen(color);
         painter->setBrush(color);
 
-        painter->drawRect(QRectF(pasteque.x() * caseWidth, pasteque.y() * caseHeight, caseWidth, caseHeight));
+        painter->drawEllipse(pasteque.x() * caseWidth + dX, pasteque.y() * caseHeight + dY, diam, diam);
     }
 
     if(!tete.isNull() && this->sensors && sensors.size()) {

@@ -159,6 +159,7 @@ void Game::next() {
     QList<float> entrees;
     QList<float> sorties = reseau.getSorties();
     QPoint tete = snake[0];
+    float max = 0.0;
 
     for(int i=0;i<sensors.size();i++) {
         Sensor sensor = sensors[i];
@@ -186,7 +187,7 @@ void Game::next() {
     sorties = reseau.eval(entrees);
 
     for(int i=0;i<sorties.size();i++) {
-        if(sorties[i] >= 0.5) {
+        if(sorties[i] >= 0.5 && sorties[i] > max) {
             switch(i) {
                 case 0:
                     incX = 0;
@@ -206,7 +207,7 @@ void Game::next() {
                 break;
             }
 
-            return;
+            max =  sorties[i];
         }
     }
 }
