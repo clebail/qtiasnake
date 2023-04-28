@@ -2,7 +2,7 @@
 #include <math.h>
 #include "game.h"
 
-Game::Game(int largeur, int hauteur) {
+Game::Game(int largeur, int hauteur, const Reseau::Poids &) {
     this->largeur = largeur;
     this->hauteur = hauteur;
 
@@ -101,6 +101,15 @@ const Reseau& Game::getReseau() const {
 
 void Game::setReseau(const Reseau& reseau) {
     this->reseau = reseau;
+}
+
+Game::GameResult Game::getResult() const {
+    Game::GameResult gr;
+
+    gr.poids = reseau.getPoids();
+    gr.score = totMouvement * snake.size();
+
+    return gr;
 }
 
 Sensor::ESensorType Game::cellFree(const QPoint& p, bool ignoreFood) const {
@@ -218,3 +227,5 @@ void Game::initReseau() {
     reseau.addCouche(Couche(12,8));
     reseau.addCouche(Couche(8,4));
 }
+
+

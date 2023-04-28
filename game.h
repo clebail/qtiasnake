@@ -8,7 +8,12 @@
 
 class Game {
 public:
-    Game(int largeur = 12, int hauteur = 12);
+    typedef struct _GameResult {
+        Reseau::Poids poids;
+        int score;
+    } GameResult;
+
+    Game(int largeur = 12, int hauteur = 12, const Reseau::Poids& poids = Reseau::Poids());
     int getLargeur();
     int getHauteur();
     const QList<QPoint>& getSnake() const;
@@ -20,6 +25,7 @@ public:
     int getIncY() const;
     const Reseau& getReseau() const;
     void setReseau(const Reseau& reseau);
+    Game::GameResult getResult() const;
 private:
     int largeur;
     int hauteur;

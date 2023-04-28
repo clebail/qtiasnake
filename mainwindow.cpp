@@ -1,14 +1,20 @@
+#include <QtDebug>
 #include "mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     setupUi(this);
 
-    game = Game(21, 15);
-    gameWidget->setGame(game);
-    reseauWidget->setReseau(game.getReseau());
+    idx = 0;
+    newGame();
 }
 
 MainWindow::~MainWindow() {
+}
+
+void MainWindow::newGame() {
+    game = Game(11, 11);
+    gameWidget->setGame(game);
+    reseauWidget->setReseau(game.getReseau());
 }
 
 void MainWindow::on_pbStep_clicked() {
@@ -18,8 +24,14 @@ void MainWindow::on_pbStep_clicked() {
 
         lblMvt->setText(QString().number(game.getNbMouvement()));
     } else {
-        game = Game(21, 15);
-        gameWidget->setGame(game);
-        reseauWidget->setReseau(game.getReseau());
+        if(idx < SIZE_GENERATION - 1) {
+            generation.append(game.getResult());
+            idx++;
+        } else {
+            generation.clear();
+            idx = 0;
+        }
+
+        newGame();
     }
 }

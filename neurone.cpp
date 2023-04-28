@@ -5,7 +5,8 @@
 Neurone::Neurone(int nbEntree) {
     this->nbEntree = nbEntree;
     for(int i=0;i<nbEntree;i++) {
-        poids.append((rand() % (int)(MAX_POIDS * 2 + 1)) - MAX_POIDS);
+        float f = ((rand() % 1000) - 500) * MAX_POIDS / 500.0;
+        poids.append(f);
     }
 }
 

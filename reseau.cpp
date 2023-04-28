@@ -47,3 +47,13 @@ QList<float> Reseau::getSorties() const {
 
     return couche.getSorties();
 }
+
+Reseau::Poids Reseau::getPoids() const {
+    Reseau::Poids poids;
+
+    for(int i=0;i<couches.size();i++) {
+        poids.append(couches[1].getPoids());
+    }
+
+    return poids;
+}

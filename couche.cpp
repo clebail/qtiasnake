@@ -49,3 +49,13 @@ QList<float> Couche::getSorties() const {
 
     return values;
 }
+
+QList<QList<float> > Couche::getPoids() const {
+    QList<QList<float> >  poids;
+
+    for(int i=0;i<neurones.size();i++) {
+        poids.append(neurones[i].getPoids());
+    }
+
+    return poids;
+}

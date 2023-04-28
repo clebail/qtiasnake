@@ -12,6 +12,7 @@ public:
     int getNbEntree() const;
     int getNbSortie() const;
     QList<float> getSorties() const;
+    QList<QList<float> > getPoids() const;
 private:
     int nbEntree;
     QList<Neurone> neurones;
