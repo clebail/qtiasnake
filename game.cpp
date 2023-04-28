@@ -107,7 +107,7 @@ Game::GameResult Game::getResult() const {
     Game::GameResult gr;
 
     gr.poids = reseau.getPoids();
-    gr.score = totMouvement * snake.size();
+    gr.score = pow(totMouvement, snake.size());
 
     return gr;
 }

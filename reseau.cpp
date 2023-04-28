@@ -52,7 +52,17 @@ Reseau::Poids Reseau::getPoids() const {
     Reseau::Poids poids;
 
     for(int i=0;i<couches.size();i++) {
-        poids.append(couches[1].getPoids());
+        poids.append(couches[i].getPoids());
+    }
+
+    return poids;
+}
+
+Reseau::Poids Reseau::fusion(const Reseau& other) const {
+    Reseau::Poids poids;
+
+    for(int i=0;i<couches.size();i++) {
+        poids.append(couches[i].fusion(other.couches[i]));
     }
 
     return poids;

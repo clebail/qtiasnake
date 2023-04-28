@@ -10,8 +10,12 @@ class Game {
 public:
     typedef struct _GameResult {
         Reseau::Poids poids;
-        int score;
+        int score;       
     } GameResult;
+
+    typedef struct _SortGameResult {
+        bool operator()(Game::GameResult a, Game::GameResult b) const { return a.score > b.score; }
+    } SortGameResult;
 
     Game(int largeur = 12, int hauteur = 12, const Reseau::Poids& poids = Reseau::Poids());
     int getLargeur();
