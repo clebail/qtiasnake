@@ -11,6 +11,13 @@ Reseau::Reseau(const QList<Couche>& couches) {
     this->couches = couches;
 }
 
+Reseau::Reseau(const Reseau::Poids &poids) {
+    for(int i=0;i<poids.size();i++) {
+        couches.append(poids[i]);
+    }
+}
+
+
 bool Reseau::addCouche(const Couche& couche) {
     if(couches.size()) {
         Couche last = couches.last();

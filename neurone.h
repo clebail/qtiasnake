@@ -12,6 +12,7 @@ public:
     void eval(const QList<float>& entree);
     QList<float> getPoids() const;
     float getValue() const;
+    QList<float> fusion(const Neurone& other) const;
 private:
     int nbEntree;
     QList<float> poids;

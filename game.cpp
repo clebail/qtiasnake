@@ -2,7 +2,7 @@
 #include <math.h>
 #include "game.h"
 
-Game::Game(int largeur, int hauteur, const Reseau::Poids &) {
+Game::Game(int largeur, int hauteur, const Reseau::Poids &poids) {
     this->largeur = largeur;
     this->hauteur = hauteur;
 
@@ -18,7 +18,13 @@ Game::Game(int largeur, int hauteur, const Reseau::Poids &) {
 
     calculSensors();
 
-    initReseau();
+   if(poids.size() == 0) {
+        qDebug() << "Pas de poids !";
+        initReseau();
+    } else {
+        qDebug() << "Poid" << poids.size();
+        reseau = Reseau(poids);
+    }
 }
 
 int Game::getLargeur() {

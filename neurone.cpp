@@ -31,3 +31,23 @@ QList<float> Neurone::getPoids() const {
 float Neurone::getValue() const {
     return value;
 }
+
+QList<float> Neurone::fusion(const Neurone& other) const {
+    QList<float> result;
+
+    for(int i=0;i<poids.size();i++) {
+        switch(rand() % 3) {
+        case 0:
+            result.append(poids[i]);
+            break;
+        case 1:
+            result.append(other.poids[i]);
+            break;
+        case 2:
+            result.append((poids[i] + other.poids[i]) / 2);
+            break;
+        }
+    }
+
+    return result;
+}

@@ -13,7 +13,7 @@ public:
     int getNbSortie() const;
     QList<float> getSorties() const;
     QList<QList<float> > getPoids() const;
-    QList<QList<float> > fusion(const Couche& couche) const;
+    QList<QList<float> > fusion(const Couche& other) const;
 private:
     int nbEntree;
     QList<Neurone> neurones;
