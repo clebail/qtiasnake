@@ -49,8 +49,7 @@ void MainWindow::onTimer() {
         } else {
             Game::SortGameResult sorter;
             std::sort(generation.begin(), generation.end(), sorter);
-
-            qDebug() << generation[0].score << generation[1].score << generation[2].score << generation[3].score;
+            Reseau::Poids newPoids;
 
             generation.clear();
             idx = 0;
