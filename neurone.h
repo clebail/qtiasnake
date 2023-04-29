@@ -3,7 +3,7 @@
 
 #include <QList>
 
-#define MAX_POIDS ((float)10.0)
+#define MAX_POIDS ((float)5.0)
 
 class Neurone {
 public:
@@ -17,6 +17,8 @@ private:
     int nbEntree;
     QList<float> poids;
     float value;
+
+    float generePoid() const;
 };
 
 #endif //NEURONE_H

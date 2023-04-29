@@ -2,6 +2,8 @@
 #include <math.h>
 #include "game.h"
 
+#define NB_SORTIE           4
+
 Game::Game(int largeur, int hauteur, const Reseau::Poids &poids) {
     this->largeur = largeur;
     this->hauteur = hauteur;
@@ -19,12 +21,15 @@ Game::Game(int largeur, int hauteur, const Reseau::Poids &poids) {
     calculSensors();
 
    if(poids.size() == 0) {
-        qDebug() << "Pas de poids !";
         initReseau();
     } else {
-        qDebug() << "Poid" << poids.size();
         reseau = Reseau(poids);
     }
+
+    caseVisite.clear();
+    caseVisite.append(snake[0].x() + snake[0].y() * largeur);
+
+    lastSortie = 3;
 }
 
 int Game::getLargeur() {
@@ -52,9 +57,12 @@ bool Game::step() {
     QPoint last = snake.last();
     QPoint newTete;
     Sensor::ESensorType type;
+    int idCase;
 
     newTete.setX(snake[0].x() + incX);
     newTete.setY(snake[0].y() + incY);
+
+    idCase = newTete.x() + newTete.y() * largeur;
 
     type = cellFree(newTete);
     if(type != Sensor::estMur && type != Sensor::estSnake)
@@ -73,6 +81,10 @@ bool Game::step() {
 
             newPasteque();
             nbMouvement = 0;
+        }
+
+        if(!caseVisite.contains(idCase)) {
+            caseVisite.append(idCase);
         }
 
         if(nbMouvement == 100) {
@@ -113,7 +125,7 @@ Game::GameResult Game::getResult() const {
     Game::GameResult gr;
 
     gr.poids = reseau.getPoids();
-    gr.score = pow(totMouvement, snake.size());
+    gr.score = caseVisite.size() * snake.size();
 
     return gr;
 }
@@ -175,6 +187,7 @@ void Game::next() {
     QList<float> sorties = reseau.getSorties();
     QPoint tete = snake[0];
     float max = 0.0;
+    int goodSortie = NB_SORTIE;
 
     for(int i=0;i<sensors.size();i++) {
         Sensor sensor = sensors[i];
@@ -185,13 +198,13 @@ void Game::next() {
                 float y = tete.y() - sensor.getPoint().y();
                 dist = sqrt(x * x + y * y) / diagonale;
             } else {
-                dist = abs(tete.x() - sensor.getPoint().x()) / (float)largeur;
+                dist = abs(tete.x() - sensor.getPoint().x()) / ((float)largeur - 2);
             }
         } else {
-            dist = abs(tete.y() - sensor.getPoint().y()) / (float)hauteur;
+            dist = abs(tete.y() - sensor.getPoint().y()) / ((float)hauteur - 2);
         }
 
-        entrees.append(dist / diagonale);
+        entrees.append(dist);
         entrees.append(sensor.getType() == Sensor::estPasteque ? 1.0 : 0.0);
     }
     entrees.append(sorties[0]);
@@ -202,7 +215,9 @@ void Game::next() {
     sorties = reseau.eval(entrees);
 
     for(int i=0;i<sorties.size();i++) {
-        if(sorties[i] >= 0.5 && sorties[i] > max) {
+        int badSortie = (lastSortie + 2) % NB_SORTIE;
+        if(sorties[i] >= 0.5 && sorties[i] > max && i != badSortie) {
+            goodSortie = i;
             switch(i) {
                 case 0:
                     incX = 0;
@@ -224,6 +239,10 @@ void Game::next() {
 
             max =  sorties[i];
         }
+    }
+
+    if(goodSortie != NB_SORTIE) {
+        lastSortie = goodSortie;
     }
 }
 

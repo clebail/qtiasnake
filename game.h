@@ -42,6 +42,8 @@ private:
     int incY;
     Reseau reseau;
     float diagonale;
+    QList<int> caseVisite;
+    int lastSortie;
 
     Sensor::ESensorType cellFree(const QPoint& p, bool ignoreFood = false) const;
     void calculSensors();

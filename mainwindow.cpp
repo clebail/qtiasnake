@@ -8,7 +8,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     timer->setInterval(10);
     connect(timer, SIGNAL(timeout()), this, SLOT(onTimer()));
 
-    idx = bestScore = 0;
+    idx = bestScore = idxGeneration = 0;
     newGame();
 }
 
@@ -21,19 +21,18 @@ void MainWindow::newGame(const Reseau::Poids &poids) {
     gameWidget->setGame(game);
     reseauWidget->setReseau(game.getReseau());
 
-    lblGeneration->setText(QString().number(idx+1)+QString(" / ")+QString().number(SIZE_GENERATION));
+    lblGeneration->setText(QString().number(idxGeneration+1)+QString(" / ")+QString().number(idx+1)+QString(" / ")+QString().number(SIZE_GENERATION));
 }
 
 QList<Reseau::Poids>  MainWindow::fusion() const {
     QList<Reseau::Poids> result;
 
-    for(int i=0;i<SIZE_GENERATION/2;i++) {
-        for(int j=i+1;j<SIZE_GENERATION/2;j++) {
-            result.append(fusion(generation[i].poids, generation[j].poids));
-        }
+    for(int i=0;i<SIZE_GENERATION/2;i+=2) {
+        result.append(generation[i].poids);
+        result.append(generation[i+1].poids);
+        result.append(fusion(generation[i].poids, generation[i+1].poids));
+        result.append(fusion(generation[i].poids, generation[i+1].poids));
     }
-
-     qDebug() << generation[0].poids.size() << result.size();
 
     return result;
 }
@@ -89,7 +88,7 @@ void MainWindow::onTimer() {
 
         lblMvt->setText(QString().number(game.getNbMouvement()));
     } else {
-        if(idx < SIZE_GENERATION - 1) {
+        if(idx < SIZE_GENERATION) {
             Game::GameResult gr = game.getResult();
 
             if(gr.score > bestScore) {
@@ -98,16 +97,20 @@ void MainWindow::onTimer() {
             }
             generation.append(gr);
 
-
             idx++;
+            if(idx < newGeneration.size()) {
+                poids = newGeneration[idx];
+            }
         } else {
             Game::SortGameResult sorter;
             std::sort(generation.begin(), generation.end(), sorter);
-            // todo fusion();
+            newGeneration = fusion();
 
             generation.clear();
             idx = 0;
-        }
+            idxGeneration++;
+            poids = newGeneration[idx];
+        }       
 
         newGame(poids);
     }

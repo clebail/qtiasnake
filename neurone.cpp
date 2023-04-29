@@ -5,14 +5,13 @@
 Neurone::Neurone(int nbEntree) {
     this->nbEntree = nbEntree;
     for(int i=0;i<nbEntree;i++) {
-        float f = ((rand() % 1000) - 500) * MAX_POIDS / 500.0;
-        poids.append(f);
+        poids.append(generePoid());
     }
 }
 
 Neurone::Neurone(const QList<float>& poids) {
     this->nbEntree = poids.size();
-    this->poids = QList<float>(poids);
+    this->poids = poids;
 }
 
 void Neurone::eval(const QList<float>& entree) {
@@ -44,10 +43,14 @@ QList<float> Neurone::fusion(const Neurone& other) const {
             result.append(other.poids[i]);
             break;
         case 2:
-            result.append((poids[i] + other.poids[i]) / 2);
+            result.append(generePoid());
             break;
         }
     }
 
     return result;
+}
+
+float Neurone::generePoid() const {
+    return ((rand() % 1000) - 500) * MAX_POIDS / 500.0;
 }
