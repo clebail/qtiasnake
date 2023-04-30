@@ -3,7 +3,7 @@
 
 #include <QList>
 
-#define MAX_POIDS ((float)5.0)
+#define MAX_POIDS ((float)100.0)
 
 class Neurone {
 public:
@@ -12,13 +12,12 @@ public:
     void eval(const QList<float>& entree);
     QList<float> getPoids() const;
     float getValue() const;
-    QList<float> fusion(const Neurone& other) const;
+
+    static float generePoid();
 private:
     int nbEntree;
     QList<float> poids;
     float value;
-
-    float generePoid() const;
 };
 
 #endif //NEURONE_H

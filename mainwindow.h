@@ -27,9 +27,6 @@ private:
 
     void newGame(const Reseau::Poids& poids = Reseau::Poids());
     QList<Reseau::Poids> fusion() const;
-    Reseau::Poids fusion(const Reseau::Poids &p1, const Reseau::Poids &p2) const;
-    QList<QList<float> > fusion(const QList<QList<float> > &l1, const QList<QList<float> > &l2) const;
-    QList<float> fusion(const QList<float> &l1, const QList<float> &l2) const;
 
 private slots:
     void on_pbStep_clicked();

@@ -13,8 +13,19 @@ Game::Game(int largeur, int hauteur, const Reseau::Poids &poids) {
     snake.append(QPoint(largeur/2, hauteur/2));
     nbMouvement = totMouvement = 0;
 
+    pasteques.append(QPoint(4, 4));
+    pasteques.append(QPoint(7, 7));
+    pasteques.append(QPoint(7, 4));
+    pasteques.append(QPoint(4, 7));
+    pasteques.append(QPoint(3, 3));
+    pasteques.append(QPoint(6, 6));
+    pasteques.append(QPoint(6, 3));
+    pasteques.append(QPoint(3, 6));
+
     incY = -1;
     incX = 0;
+
+    idPasteque = -1;
 
     newPasteque();
 
@@ -29,7 +40,7 @@ Game::Game(int largeur, int hauteur, const Reseau::Poids &poids) {
     caseVisite.clear();
     caseVisite.append(snake[0].x() + snake[0].y() * largeur);
 
-    lastSortie = 3;
+    lastSortie = 0;
 }
 
 int Game::getLargeur() {
@@ -125,7 +136,8 @@ Game::GameResult Game::getResult() const {
     Game::GameResult gr;
 
     gr.poids = reseau.getPoids();
-    gr.score = caseVisite.size() * snake.size();
+    //gr.score = pow(totMouvement, snake.size());
+    gr.score = pow(caseVisite.size(), snake.size());
 
     return gr;
 }
@@ -152,14 +164,10 @@ Sensor::ESensorType Game::cellFree(const QPoint& p, bool ignoreFood) const {
 void Game::calculSensors() {
     sensors.clear();
 
-    sensors.append(getFirstCellOccupe(-1, -1));
     sensors.append(getFirstCellOccupe(0, -1));
-    sensors.append(getFirstCellOccupe(1, -1));
+    sensors.append(getFirstCellOccupe(0, 1));
     sensors.append(getFirstCellOccupe(-1, 0));
     sensors.append(getFirstCellOccupe(1, 0));
-    sensors.append(getFirstCellOccupe(-1, 1));
-    sensors.append(getFirstCellOccupe(0, 1));
-    sensors.append(getFirstCellOccupe(1, 1));
 }
 
 Sensor Game::getFirstCellOccupe(int incX, int incY) const {
@@ -178,7 +186,8 @@ Sensor Game::getFirstCellOccupe(int incX, int incY) const {
 
 void Game::newPasteque() {
     do {
-        pasteque = QPoint(rand() % (largeur - 2) + 1, rand() % (hauteur - 2) + 1);
+        idPasteque = (idPasteque + 1) % pasteques.size();
+        pasteque =pasteques[idPasteque];
     }while (cellFree(pasteque, true) != Sensor::estNone);
 }
 
@@ -193,30 +202,25 @@ void Game::next() {
         Sensor sensor = sensors[i];
         float dist;
         if(tete.x() != sensor.getPoint().x()) {
-            if(tete.y() !=  sensor.getPoint().y()) {
-                float x = tete.x() - sensor.getPoint().x();
-                float y = tete.y() - sensor.getPoint().y();
-                dist = sqrt(x * x + y * y) / diagonale;
-            } else {
-                dist = abs(tete.x() - sensor.getPoint().x()) / ((float)largeur - 2);
-            }
+            dist = abs(tete.x() - sensor.getPoint().x()) / largeur;
         } else {
-            dist = abs(tete.y() - sensor.getPoint().y()) / ((float)hauteur - 2);
+            dist = abs(tete.y() - sensor.getPoint().y()) / hauteur;
         }
 
         entrees.append(dist);
         entrees.append(sensor.getType() == Sensor::estPasteque ? 1.0 : 0.0);
     }
-    entrees.append(sorties[0]);
-    entrees.append(sorties[1]);
-    entrees.append(sorties[2]);
-    entrees.append(sorties[3]);
+    entrees.append(lastSortie == 0 ? 1.0 : 0.0);
+    entrees.append(lastSortie == 1 ? 1.0 : 0.0);
+    entrees.append(lastSortie == 2 ? 1.0 : 0.0);
+    entrees.append(lastSortie == 3 ? 1.0 : 0.0);
 
     sorties = reseau.eval(entrees);
 
     for(int i=0;i<sorties.size();i++) {
         int badSortie = (lastSortie + 2) % NB_SORTIE;
-        if(sorties[i] >= 0.5 && sorties[i] > max && i != badSortie) {
+
+        if(sorties[i] >= 0.9 && sorties[i] > max && i != badSortie) {
             goodSortie = i;
             switch(i) {
                 case 0:
@@ -247,10 +251,9 @@ void Game::next() {
 }
 
 void Game::initReseau() {
-    reseau.addCouche(Couche(20,16));
-    reseau.addCouche(Couche(16,12));
     reseau.addCouche(Couche(12,8));
     reseau.addCouche(Couche(8,4));
+    reseau.addCouche(Couche(4,4));
 }
 
 

@@ -47,6 +47,11 @@ void SnakeWidget::drawGame(QPainter *painter) {
                painter->setBrush(QColorConstants::Gray);
 
                painter->drawRect(QRectF(x * caseWidth, y * caseHeight, caseWidth, caseHeight));
+               if(y == 0 || y == hauteur - 1) {
+                   painter->drawText(QRectF(x * caseWidth, y * caseHeight, caseWidth, caseHeight), QString().number(x), QTextOption(Qt::AlignHCenter));
+               } else {
+                   painter->drawText(QRectF(x * caseWidth, y * caseHeight, caseWidth, caseHeight), QString().number(y), QTextOption(Qt::AlignHCenter));
+               }
             }
         }
     }

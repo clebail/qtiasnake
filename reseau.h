@@ -16,7 +16,6 @@ public:
     QList<Couche> getCouches() const;
     QList<float> getSorties() const;
     Reseau::Poids getPoids() const;
-    Reseau::Poids fusion(const Reseau &other) const;
 private:
     QList<Couche> couches;
 };

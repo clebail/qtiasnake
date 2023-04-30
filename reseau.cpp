@@ -64,13 +64,3 @@ Reseau::Poids Reseau::getPoids() const {
 
     return poids;
 }
-
-Reseau::Poids Reseau::fusion(const Reseau& other) const {
-    Reseau::Poids poids;
-
-    for(int i=0;i<couches.size();i++) {
-        poids.append(couches[i].fusion(other.couches[i]));
-    }
-
-    return poids;
-}

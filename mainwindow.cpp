@@ -5,8 +5,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     setupUi(this);
 
     timer = new QTimer(this);
-    timer->setInterval(10);
     connect(timer, SIGNAL(timeout()), this, SLOT(onTimer()));
+    timer->setInterval(10);
+    //gameWidget->showSensors(false);
 
     idx = bestScore = idxGeneration = 0;
     newGame();
@@ -26,52 +27,56 @@ void MainWindow::newGame(const Reseau::Poids &poids) {
 
 QList<Reseau::Poids>  MainWindow::fusion() const {
     QList<Reseau::Poids> result;
+    int i1 = 0;
+    int i2 = 1;
+    int id = 0;
 
-    for(int i=0;i<SIZE_GENERATION/2;i+=2) {
-        result.append(generation[i].poids);
-        result.append(generation[i+1].poids);
-        result.append(fusion(generation[i].poids, generation[i+1].poids));
-        result.append(fusion(generation[i].poids, generation[i+1].poids));
-    }
+    while(result.size() < generation.size()) {
+        Reseau::Poids p1 = generation[i1].poids;
+        Reseau::Poids p2 = generation[i2].poids;
+        Reseau::Poids pr1;
+        Reseau::Poids pr2;
 
-    return result;
-}
+        for(int j=0;j<p1.size();j++) {
+            QList<QList<float> > lpc1 = p1[j];
+            QList<QList<float> > lpc2 = p2[j];
+            QList<QList<float> > lprc1;
+            QList<QList<float> > lprc2;
 
-Reseau::Poids MainWindow::fusion(const Reseau::Poids &p1, const Reseau::Poids &p2) const {
-    Reseau::Poids poids;
+            for(int k=0;k<lpc1.size();k++) {
+                QList<float> lpn1 = lpc1[k];
+                QList<float> lpn2 = lpc2[k];
+                QList<float> lprn1;
+                QList<float> lprn2;
+                int pivot = rand() % lpn1.size();
 
-    for(int i=0;i<p1.size();i++) {
-        poids.append(fusion(p1[i], p2[i]));
-    }
+                for(int l=0;l<lpn1.size();l++) {
+                    if(l <= pivot) {
+                        lprn1.append(lpn1[l]);
+                        lprn2.append(lpn2[l]);
+                    } else {
+                        lprn1.append(lpn2[l]);
+                        lprn2.append(lpn1[l]);
+                    }
+                }
 
-    return poids;
-}
+                lprn1[rand() % lpn1.size()] = Neurone::generePoid();
+                lprn2[rand() % lpn2.size()] = Neurone::generePoid();
 
-QList<QList<float> > MainWindow::fusion(const QList<QList<float> > &l1, const QList<QList<float> > &l2) const {
-    QList<QList<float> > result;
+                lprc1.append(lprn1);
+                lprc2.append(lprn2);
+            }
 
-    for(int i=0;i<l1.size();i++) {
-        result.append(fusion(l1[i], l2[i]));
-    }
-
-    return result;
-}
-
-QList<float> MainWindow::fusion(const QList<float> &l1, const QList<float> &l2) const {
-    QList<float> result;
-
-    for(int i=0;i<l1.size();i++) {
-        switch(rand() % 3) {
-        case 0:
-            result.append(l1[i]);
-            break;
-        case 1:
-            result.append(l2[i]);
-            break;
-        case 2:
-            result.append((l1[i] + l2[i]) / 2);
-            break;
+            pr1.append(lprc1);
+            pr2.append(lprc2);
         }
+
+        result.append(pr1);
+        result.append(pr2);
+
+        id++;
+        i1 = (id / 2) % generation.size();
+        i2 = (i2 + 1) % generation.size();
     }
 
     return result;
@@ -100,7 +105,7 @@ void MainWindow::onTimer() {
             idx++;
             if(idx < newGeneration.size()) {
                 poids = newGeneration[idx];
-            }
+            }           
         } else {
             Game::SortGameResult sorter;
             std::sort(generation.begin(), generation.end(), sorter);
@@ -110,6 +115,8 @@ void MainWindow::onTimer() {
             idx = 0;
             idxGeneration++;
             poids = newGeneration[idx];
+
+            timer->setInterval(10+(idxGeneration * 10));
         }       
 
         newGame(poids);

@@ -44,6 +44,8 @@ private:
     float diagonale;
     QList<int> caseVisite;
     int lastSortie;
+    QList<QPoint> pasteques;
+    int idPasteque;
 
     Sensor::ESensorType cellFree(const QPoint& p, bool ignoreFood = false) const;
     void calculSensors();
