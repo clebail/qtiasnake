@@ -7,7 +7,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(onTimer()));
     timer->setInterval(10);
-    //gameWidget->showSensors(false);
+    // gameWidget->showSensors(false);
 
     idx = bestScore = idxGeneration = 0;
     newGame();

@@ -24,12 +24,19 @@ void ReseauWidget::paintEvent(QPaintEvent *) {
 
 void ReseauWidget::drawReseau(QPainter *painter) {
     QList<Couche> couches = reseau.getCouches();
+    QList<float> entrees = reseau.getEntress();
+    float entreesHeight = height() / (entrees.size() + 1);
+
+    painter->setPen(QColorConstants::Black);
+    for(int i=0;i<entrees.size();i++) {
+        painter->drawText(QPoint(5, i * entreesHeight + entreesHeight), QString().number((double)entrees[i], 'f', 3));
+    }
+
     if(couches.size()) {
         QList<Couche>::const_iterator c;
         int i;
         int coucheWidth = width() / (couches.size() + 1);
 
-        painter->setPen(QColorConstants::Black);
         for(i=0,c=couches.begin();c!=couches.end();++c, i++) {
             Couche couche = *c;
             QList<Neurone> neurones = couche.getNeurones();

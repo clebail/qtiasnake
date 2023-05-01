@@ -7,20 +7,27 @@ Neurone::Neurone(int nbEntree) {
     for(int i=0;i<nbEntree;i++) {
         poids.append(Neurone::generePoid());
     }
+
+    poids.append(Neurone::generePoid());
 }
 
 Neurone::Neurone(const QList<float>& poids) {
-    this->nbEntree = poids.size();
+    this->nbEntree = poids.size() - 1;
     this->poids = poids;
+
+    // this->poids.append(Neurone::generePoid());
 }
 
 void Neurone::eval(const QList<float>& entree) {
     float sum = 0;
-    for(int i=0;i<nbEntree;i++) {
+    int i;
+    for(i=0;i<nbEntree;i++) {
         sum += entree.at(i) * poids.at(i);
     }
+
+    sum += poids.at(i);
     
-    value = (1.0 / (1.0 + exp(-sum))) > 0.9 ? 1.0 : 0.0;
+    value = (1.0 / (1.0 + exp(-sum)));
 }
 
 QList<float> Neurone::getPoids() const {

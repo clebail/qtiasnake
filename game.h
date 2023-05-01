@@ -43,7 +43,7 @@ private:
     Reseau reseau;
     float diagonale;
     QList<int> caseVisite;
-    int lastSortie;
+    float lastSortie;
     QList<QPoint> pasteques;
     int idPasteque;
 

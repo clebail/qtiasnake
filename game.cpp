@@ -3,12 +3,13 @@
 #include "game.h"
 
 #define NB_SORTIE           4
+#define PI                  ((float)(3.14159))
 
 Game::Game(int largeur, int hauteur, const Reseau::Poids &poids) {
     this->largeur = largeur;
     this->hauteur = hauteur;
 
-    diagonale = sqrt(largeur * largeur + hauteur * hauteur);
+    diagonale = sqrt((largeur - 2) * (largeur - 2) + (hauteur - 2) * (hauteur - 2));
 
     snake.append(QPoint(largeur/2, hauteur/2));
     nbMouvement = totMouvement = 0;
@@ -40,7 +41,7 @@ Game::Game(int largeur, int hauteur, const Reseau::Poids &poids) {
     caseVisite.clear();
     caseVisite.append(snake[0].x() + snake[0].y() * largeur);
 
-    lastSortie = 0;
+    lastSortie = 0.0;
 }
 
 int Game::getLargeur() {
@@ -168,6 +169,8 @@ void Game::calculSensors() {
     sensors.append(getFirstCellOccupe(0, 1));
     sensors.append(getFirstCellOccupe(-1, 0));
     sensors.append(getFirstCellOccupe(1, 0));
+
+    sensors.append(Sensor(pasteque, Sensor::estPasteque));
 }
 
 Sensor Game::getFirstCellOccupe(int incX, int incY) const {
@@ -195,65 +198,57 @@ void Game::next() {
     QList<float> entrees;
     QList<float> sorties = reseau.getSorties();
     QPoint tete = snake[0];
-    float max = 0.0;
-    int goodSortie = NB_SORTIE;
+    int diffX, diffY;
+    float angle;
 
-    for(int i=0;i<sensors.size();i++) {
-        Sensor sensor = sensors[i];
-        float dist;
-        if(tete.x() != sensor.getPoint().x()) {
-            dist = abs(tete.x() - sensor.getPoint().x()) / largeur;
+    entrees.append(cellFree(QPoint(tete.x(), tete.y() - 1), true) == Sensor::estNone ? 1 : 0);
+    entrees.append(cellFree(QPoint(tete.x() + 1, tete.y()), true) == Sensor::estNone ? 1 : 0);
+    entrees.append(cellFree(QPoint(tete.x(), tete.y() + 1), true) == Sensor::estNone ? 1 : 0);
+    entrees.append(cellFree(QPoint(tete.x() - 1, tete.y()), true) == Sensor::estNone ? 1 : 0);
+
+
+    diffX = pasteque.x() - tete.x();
+    diffY = pasteque.y() - tete.y();
+
+    if(diffY == 0) {
+        angle = diffX > 0 ? 0 : PI;
+    } else if(diffX == 0) {
+        angle = diffY > 0 ? PI/2 : 3*PI/2;
+    } else {
+        if(abs(diffY) > abs(diffX)) {
+            angle = acos((float)diffX / (float)abs(diffY));
         } else {
-            dist = abs(tete.y() - sensor.getPoint().y()) / hauteur;
+            angle = asin((float)diffY / (float)abs(diffX));
         }
-
-        entrees.append(dist);
-        entrees.append(sensor.getType() == Sensor::estPasteque ? 1.0 : 0.0);
     }
-    entrees.append(lastSortie == 0 ? 1.0 : 0.0);
-    entrees.append(lastSortie == 1 ? 1.0 : 0.0);
-    entrees.append(lastSortie == 2 ? 1.0 : 0.0);
-    entrees.append(lastSortie == 3 ? 1.0 : 0.0);
+
+    entrees.append(angle / (2 * PI));
+    entrees.append(sqrt(diffX * diffX + diffY - diffY) / diagonale);
+    entrees.append(lastSortie);
 
     sorties = reseau.eval(entrees);
 
-    for(int i=0;i<sorties.size();i++) {
-        int badSortie = (lastSortie + 2) % NB_SORTIE;
-
-        if(sorties[i] >= 0.9 && sorties[i] > max && i != badSortie) {
-            goodSortie = i;
-            switch(i) {
-                case 0:
-                    incX = 0;
-                    incY = -1;
-                break;
-                case 1:
-                    incX = 1;
-                    incY = 0;
-                break;
-                case 2:
-                    incX = 0;
-                    incY = 1;
-                break;
-                case 3:
-                    incX = -1;
-                    incY = 0;
-                break;
-            }
-
-            max =  sorties[i];
-        }
+    if(sorties[0] < 0.25) {
+        incY = -1;
+        incX = 0;
+    } else if(sorties[0] < 0.5) {
+        incX = 1;
+        incY = 0;
+    } else if(sorties[0] < 0.75) {
+        incX = 0;
+        incY = 1;
+    } else {
+        incX = -1;
+        incY = 0;
     }
 
-    if(goodSortie != NB_SORTIE) {
-        lastSortie = goodSortie;
-    }
+    lastSortie = sorties[0];
 }
 
 void Game::initReseau() {
-    reseau.addCouche(Couche(12,8));
-    reseau.addCouche(Couche(8,4));
-    reseau.addCouche(Couche(4,4));
+    reseau.addCouche(Couche(7,6));
+    reseau.addCouche(Couche(6,4));
+    reseau.addCouche(Couche(4,1));
 }
 
 

@@ -16,8 +16,10 @@ public:
     QList<Couche> getCouches() const;
     QList<float> getSorties() const;
     Reseau::Poids getPoids() const;
+    QList<float> getEntress() const;
 private:
     QList<Couche> couches;
+    QList<float> entrees;
 };
 
 #endif //RESEAU_H

@@ -38,6 +38,8 @@ bool Reseau::addCouche(const Couche& couche) {
 QList<float> Reseau::eval(const QList<float>& entrees) {
     QList<float> es = entrees;
 
+    this->entrees = entrees;
+
     for(int i=0;i<couches.size();i++) {
         es = couches[i].eval(es);
     }
@@ -63,4 +65,7 @@ Reseau::Poids Reseau::getPoids() const {
     }
 
     return poids;
+}
+QList<float> Reseau::getEntress() const {
+    return entrees;
 }
