@@ -103,6 +103,7 @@ bool Game::step() {
         }
 
         if(nbMouvement == 100) {
+            perdu = true;
             return false;
         }
 
@@ -137,7 +138,7 @@ Game::GameResult Game::getResult() const {
     // gr.score = pow(totMouvement, snake.size());
     // gr.score = pow(caseVisite.size(), snake.size());
     // gr.score = (snake.size() - 1) * 10 - (perdu ? 10 : 0);
-    gr.score = caseVisite.size() + (snake.size() - 1) * 100 - (perdu ? 90 : 0);
+    gr.score = caseVisite.size() + (snake.size() - 1) * 100 - (perdu ? 5 : 0);
     return gr;
 }
 
@@ -210,7 +211,7 @@ Sensor Game::getFirstCellOccupe(int incX, int incY) const {
 void Game::newPasteque() {
     do {
         idPasteque = (idPasteque + 1) % pasteques.size();
-        pasteque =pasteques[idPasteque];
+        pasteque = pasteques[idPasteque];
     }while (cellFree(pasteque, true) != Sensor::estNone);
 }
 
@@ -220,45 +221,63 @@ void Game::next() {
     QPoint tete = snake[0];
     float max = -1;
     int incX, incY;
+    int factX = 1;
+    int factY = 1;
+
+    getIncs(incX, incY);
+
+    if(incX < 0) {
+        factX = -1;
+    }
+
+    if(incY < 0) {
+        factY = -1;
+    }
 
     for(int i=0;i<sensors.size();i++) {
         if(sensors[i].getType() != Sensor::estPasteque) {
             int diffX = sensors[i].getPoint().x() - tete.x();
             int diffY = sensors[i].getPoint().y() - tete.y();
 
-            entrees.append(diffX / (float)(largeur - 2));
-            entrees.append(diffY / (float)(hauteur - 2));
+            entrees.append(diffX / (float)(largeur - 2) * factX);
+            entrees.append(diffY / (float)(hauteur - 2) * factY);
         }
     }
 
-    getIncs(incX, incY);
 
-    entrees.append((pasteque.x() - tete.x()) / (float)(largeur - 2));
-    entrees.append((pasteque.y() - tete.y()) / (float)(hauteur - 2));
     entrees.append(incX);
     entrees.append(incY);
 
-    sorties = reseau.eval(entrees);
+    entrees.append((pasteque.x() - tete.x()) / (float)(largeur - 2) * factX);
+    entrees.append((pasteque.y() - tete.y()) / (float)(hauteur - 2) * factY);
 
     for(int i=0;i<sorties.size();i++) {
         if(sorties[i] > max && sorties[i] > 0.5) {
-            if(i == 1) {
+            if(i >= 1) {
                 if(incX != 0) {
-                    setDirection(0, (i == 1 ? -1 : 1) * incX);
+                    incY = (i == 1 ? -1 : 1) * incX;
+                    incX = 0;
                 } else {
-                    setDirection((i == 1 ? 1 : -1) * incY, 0);
+                    incX = (i == 1 ? 1 : -1) * incY;
+                    incY = 0;
                 }
+
+                setDirection(incX, incY);
             }
 
             lastSortie = i;
             max = sorties[i];
         }
     }
+
+     sorties = reseau.eval(entrees);
 }
 
 void Game::initReseau() {
     reseau.addCouche(Couche(12, 24));
-    reseau.addCouche(Couche(24, 3));
+    reseau.addCouche(Couche(24, 12));
+    reseau.addCouche(Couche(12, 6));
+    reseau.addCouche(Couche(6, 3));
 }
 
 void Game::getIncs(int &incX, int &incY) const {
