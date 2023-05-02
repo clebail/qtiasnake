@@ -1,7 +1,7 @@
 #include <QtDebug>
 #include "reseauwidget.h"
 
-#define DIAM            20
+#define DIAM            5
 #define RAYON           (DIAM / 2)
 
 ReseauWidget::ReseauWidget(QWidget *parent) : QWidget{parent} {

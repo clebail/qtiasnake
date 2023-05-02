@@ -42,6 +42,8 @@ Game::Game(int largeur, int hauteur, const Reseau::Poids &poids) {
     caseVisite.append(snake[0].x() + snake[0].y() * largeur);
 
     lastSortie = 0.0;
+
+    perdu = false;
 }
 
 int Game::getLargeur() {
@@ -110,6 +112,7 @@ bool Game::step() {
 
     }
 
+    perdu = true;
     return false;
 }
 
@@ -137,8 +140,9 @@ Game::GameResult Game::getResult() const {
     Game::GameResult gr;
 
     gr.poids = reseau.getPoids();
-    //gr.score = pow(totMouvement, snake.size());
-    gr.score = pow(caseVisite.size(), snake.size());
+    // gr.score = pow(totMouvement, snake.size());
+    // gr.score = pow(caseVisite.size(), snake.size());
+    gr.score = (snake.size() - 1) * 10 - (perdu ? 10 : 0);
 
     return gr;
 }
@@ -200,6 +204,7 @@ void Game::next() {
     QPoint tete = snake[0];
     int diffX, diffY;
     float angle;
+    float max = -1;
 
     entrees.append(cellFree(QPoint(tete.x(), tete.y() - 1), true) == Sensor::estNone ? 1 : 0);
     entrees.append(cellFree(QPoint(tete.x() + 1, tete.y()), true) == Sensor::estNone ? 1 : 0);
@@ -224,31 +229,33 @@ void Game::next() {
 
     entrees.append(angle / (2 * PI));
     entrees.append(sqrt(diffX * diffX + diffY - diffY) / diagonale);
-    entrees.append(lastSortie);
+    entrees.append(lastSortie == 0 ? 1.0 : 0.0);
+    entrees.append(lastSortie == 1 ? 1.0 : 0.0);
+    entrees.append(lastSortie == 2 ? 1.0 : 0.0);
 
     sorties = reseau.eval(entrees);
 
-    if(sorties[0] < 0.25) {
-        incY = -1;
-        incX = 0;
-    } else if(sorties[0] < 0.5) {
-        incX = 1;
-        incY = 0;
-    } else if(sorties[0] < 0.75) {
-        incX = 0;
-        incY = 1;
-    } else {
-        incX = -1;
-        incY = 0;
-    }
+    for(int i=0;i<sorties.size();i++) {
+        if(sorties[i] > max) {
+            if(i >= 1) {
+                if(incX != 0) {
+                    incY = (i == 1 ? -1 : 1) * incX;
+                    incX = 0;
+                } else {
+                    incX = (i == 1 ? 1 : -1) * incY;
+                    incY = 0;
+                }
+            }
 
-    lastSortie = sorties[0];
+            lastSortie = i;
+            max = sorties[i];
+        }
+    }
 }
 
 void Game::initReseau() {
-    reseau.addCouche(Couche(7,6));
-    reseau.addCouche(Couche(6,4));
-    reseau.addCouche(Couche(4,1));
+    reseau.addCouche(Couche(9, 6));
+    reseau.addCouche(Couche(6, 3));
 }
 
 

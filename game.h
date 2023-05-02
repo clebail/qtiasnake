@@ -46,6 +46,7 @@ private:
     float lastSortie;
     QList<QPoint> pasteques;
     int idPasteque;
+    bool perdu;
 
     Sensor::ESensorType cellFree(const QPoint& p, bool ignoreFood = false) const;
     void calculSensors();
