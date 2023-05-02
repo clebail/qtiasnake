@@ -142,8 +142,8 @@ Game::GameResult Game::getResult() const {
     gr.poids = reseau.getPoids();
     // gr.score = pow(totMouvement, snake.size());
     // gr.score = pow(caseVisite.size(), snake.size());
-    gr.score = (snake.size() - 1) * 10 - (perdu ? 10 : 0);
-
+    // gr.score = (snake.size() - 1) * 10 - (perdu ? 10 : 0);
+    gr.score = caseVisite.size() + (snake.size() - 1) * 100 - (perdu ? 100 : 0);
     return gr;
 }
 
@@ -210,7 +210,6 @@ void Game::next() {
     entrees.append(cellFree(QPoint(tete.x() + 1, tete.y()), true) == Sensor::estNone ? 1 : 0);
     entrees.append(cellFree(QPoint(tete.x(), tete.y() + 1), true) == Sensor::estNone ? 1 : 0);
     entrees.append(cellFree(QPoint(tete.x() - 1, tete.y()), true) == Sensor::estNone ? 1 : 0);
-
 
     diffX = pasteque.x() - tete.x();
     diffY = pasteque.y() - tete.y();
