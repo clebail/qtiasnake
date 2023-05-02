@@ -8,6 +8,8 @@
 
 class Game {
 public:
+    typedef enum { edHaut, edDroite, edBas, edGauche } Direction;
+
     typedef struct _GameResult {
         Reseau::Poids poids;
         int score;       
@@ -25,8 +27,6 @@ public:
     const QPoint& getPasteque() const;
     bool step();
     int getNbMouvement() const;
-    int getIncX() const;
-    int getIncY() const;
     const Reseau& getReseau() const;
     void setReseau(const Reseau& reseau);
     Game::GameResult getResult() const;
@@ -38,8 +38,6 @@ private:
     QPoint pasteque;
     int nbMouvement;
     int totMouvement;
-    int incX;
-    int incY;
     Reseau reseau;
     float diagonale;
     QList<int> caseVisite;
@@ -47,6 +45,7 @@ private:
     QList<QPoint> pasteques;
     int idPasteque;
     bool perdu;
+    Game::Direction direction;
 
     Sensor::ESensorType cellFree(const QPoint& p, bool ignoreFood = false) const;
     void calculSensors();
@@ -54,6 +53,8 @@ private:
     void newPasteque();
     void next();
     void initReseau();
+    void getIncs(int &incX, int &incY) const;
+    void setDirection(int incX, int incY);
 };
 
 #endif // GAME_H

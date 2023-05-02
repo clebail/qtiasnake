@@ -88,12 +88,12 @@ void SnakeWidget::drawGame(QPainter *painter) {
         int startX = tete.x() * caseWidth + caseWidth2;
         int startY =tete.y() * caseHeight + caseHeight2;
         QPoint start(startX, startY);
-        QList<Sensor>::const_iterator i;
+        QColor colors[] = {QColorConstants::Blue, QColorConstants::Red, QColorConstants::Cyan, QColorConstants::Yellow, QColorConstants::DarkGreen };
 
-        painter->setPen(QColorConstants::Blue);
-        for(i=sensors.begin();i!=sensors.end();++i) {
-            QPoint p((*i).getPoint().x() * caseWidth + caseWidth2, (*i).getPoint().y() * caseHeight + caseHeight2);
+        for(int i=0;i<sensors.size();i++) {
+            QPoint p(sensors[i].getPoint().x() * caseWidth + caseWidth2, sensors[i].getPoint().y() * caseHeight + caseHeight2);
 
+            painter->setPen(colors[i]);
             painter->drawLine(start, p);
         }
     }

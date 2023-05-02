@@ -23,8 +23,7 @@ Game::Game(int largeur, int hauteur, const Reseau::Poids &poids) {
     pasteques.append(QPoint(6, 3));
     pasteques.append(QPoint(3, 6));
 
-    incY = -1;
-    incX = 0;
+    direction = Game::edHaut;
 
     idPasteque = -1;
 
@@ -72,7 +71,9 @@ bool Game::step() {
     QPoint newTete;
     Sensor::ESensorType type;
     int idCase;
+    int incX, incY;
 
+    getIncs(incX, incY);
     newTete.setX(snake[0].x() + incX);
     newTete.setY(snake[0].y() + incY);
 
@@ -113,19 +114,12 @@ bool Game::step() {
     }
 
     perdu = true;
+
     return false;
 }
 
 int Game::getNbMouvement() const {
     return totMouvement;
-}
-
-int Game::getIncX() const {
-    return incX;
-}
-
-int Game::getIncY() const {
-    return incY;
 }
 
 const Reseau& Game::getReseau() const {
@@ -143,7 +137,7 @@ Game::GameResult Game::getResult() const {
     // gr.score = pow(totMouvement, snake.size());
     // gr.score = pow(caseVisite.size(), snake.size());
     // gr.score = (snake.size() - 1) * 10 - (perdu ? 10 : 0);
-    gr.score = caseVisite.size() + (snake.size() - 1) * 100 - (perdu ? 100 : 0);
+    gr.score = caseVisite.size() + (snake.size() - 1) * 100 - (perdu ? 90 : 0);
     return gr;
 }
 
@@ -169,10 +163,32 @@ Sensor::ESensorType Game::cellFree(const QPoint& p, bool ignoreFood) const {
 void Game::calculSensors() {
     sensors.clear();
 
-    sensors.append(getFirstCellOccupe(0, -1));
-    sensors.append(getFirstCellOccupe(0, 1));
-    sensors.append(getFirstCellOccupe(-1, 0));
-    sensors.append(getFirstCellOccupe(1, 0));
+    switch(direction) {
+    case Game::edHaut:
+        sensors.append(getFirstCellOccupe(0, -1));
+        sensors.append(getFirstCellOccupe(1, 0));
+        sensors.append(getFirstCellOccupe(0, 1));
+        sensors.append(getFirstCellOccupe(-1, 0));
+        break;
+    case Game::edDroite:
+        sensors.append(getFirstCellOccupe(1, 0));
+        sensors.append(getFirstCellOccupe(0, 1));
+        sensors.append(getFirstCellOccupe(-1, 0));
+        sensors.append(getFirstCellOccupe(0, -1));
+        break;
+    case Game::edBas:
+        sensors.append(getFirstCellOccupe(0, 1));
+        sensors.append(getFirstCellOccupe(-1, 0));
+        sensors.append(getFirstCellOccupe(0, -1));
+        sensors.append(getFirstCellOccupe(1, 0));
+        break;
+    case Game::edGauche:
+        sensors.append(getFirstCellOccupe(-1, 0));
+        sensors.append(getFirstCellOccupe(0, -1));
+        sensors.append(getFirstCellOccupe(1, 0));
+        sensors.append(getFirstCellOccupe(0, 1));
+        break;
+    }
 
     sensors.append(Sensor(pasteque, Sensor::estPasteque));
 }
@@ -184,7 +200,7 @@ Sensor Game::getFirstCellOccupe(int incX, int incY) const {
 
     // en haut à gauche
     p = QPoint(tete.x() + incX, tete.y() +incY);
-    while((type = cellFree(p)) == Sensor::estNone) {
+    while((type = cellFree(p, true)) == Sensor::estNone) {
        p = QPoint(p.x() + incX, p.y() +incY);
     }
 
@@ -202,47 +218,35 @@ void Game::next() {
     QList<float> entrees;
     QList<float> sorties = reseau.getSorties();
     QPoint tete = snake[0];
-    int diffX, diffY;
-    float angle;
     float max = -1;
+    int incX, incY;
 
-    entrees.append(cellFree(QPoint(tete.x(), tete.y() - 1), true) == Sensor::estNone ? 1 : 0);
-    entrees.append(cellFree(QPoint(tete.x() + 1, tete.y()), true) == Sensor::estNone ? 1 : 0);
-    entrees.append(cellFree(QPoint(tete.x(), tete.y() + 1), true) == Sensor::estNone ? 1 : 0);
-    entrees.append(cellFree(QPoint(tete.x() - 1, tete.y()), true) == Sensor::estNone ? 1 : 0);
+    for(int i=0;i<sensors.size();i++) {
+        if(sensors[i].getType() != Sensor::estPasteque) {
+            int diffX = sensors[i].getPoint().x() - tete.x();
+            int diffY = sensors[i].getPoint().y() - tete.y();
 
-    diffX = pasteque.x() - tete.x();
-    diffY = pasteque.y() - tete.y();
-
-    if(diffY == 0) {
-        angle = diffX > 0 ? 0 : PI;
-    } else if(diffX == 0) {
-        angle = diffY > 0 ? PI/2 : 3*PI/2;
-    } else {
-        if(abs(diffY) > abs(diffX)) {
-            angle = acos((float)diffX / (float)abs(diffY));
-        } else {
-            angle = asin((float)diffY / (float)abs(diffX));
+            entrees.append(diffX / (float)(largeur - 2));
+            entrees.append(diffY / (float)(hauteur - 2));
         }
     }
 
-    entrees.append(angle / (2 * PI));
-    entrees.append(sqrt(diffX * diffX + diffY - diffY) / diagonale);
-    entrees.append(lastSortie == 0 ? 1.0 : 0.0);
-    entrees.append(lastSortie == 1 ? 1.0 : 0.0);
-    entrees.append(lastSortie == 2 ? 1.0 : 0.0);
+    getIncs(incX, incY);
+
+    entrees.append((pasteque.x() - tete.x()) / (float)(largeur - 2));
+    entrees.append((pasteque.y() - tete.y()) / (float)(hauteur - 2));
+    entrees.append(incX);
+    entrees.append(incY);
 
     sorties = reseau.eval(entrees);
 
     for(int i=0;i<sorties.size();i++) {
-        if(sorties[i] > max) {
-            if(i >= 1) {
+        if(sorties[i] > max && sorties[i] > 0.5) {
+            if(i == 1) {
                 if(incX != 0) {
-                    incY = (i == 1 ? -1 : 1) * incX;
-                    incX = 0;
+                    setDirection(0, (i == 1 ? -1 : 1) * incX);
                 } else {
-                    incX = (i == 1 ? 1 : -1) * incY;
-                    incY = 0;
+                    setDirection((i == 1 ? 1 : -1) * incY, 0);
                 }
             }
 
@@ -253,8 +257,38 @@ void Game::next() {
 }
 
 void Game::initReseau() {
-    reseau.addCouche(Couche(9, 27));
-    reseau.addCouche(Couche(27, 3));
+    reseau.addCouche(Couche(12, 24));
+    reseau.addCouche(Couche(24, 3));
 }
+
+void Game::getIncs(int &incX, int &incY) const {
+    switch(direction) {
+    case Game::edHaut:
+        incX = 0; incY = -1;
+        return;
+    case Game::edDroite:
+        incX = 1; incY = 0;
+        return;
+    case Game::edBas:
+        incX = 0; incY = 1;
+        return;
+    case Game::edGauche:
+        incX = -1; incY = 0;
+        return;
+    }
+}
+
+void Game::setDirection(int incX, int incY) {
+    if(incX == 0 && incY == -1) {
+        direction = Game::edHaut;
+    } else if(incX == 1 && incY == 0) {
+        direction = Game::edDroite;
+    } else if(incX == 0 && incY == 1) {
+        direction = Game::edBas;
+    } else {
+        direction = Game::edGauche;
+    }
+}
+
 
 
