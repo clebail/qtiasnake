@@ -254,8 +254,8 @@ void Game::next() {
 }
 
 void Game::initReseau() {
-    reseau.addCouche(Couche(9, 6));
-    reseau.addCouche(Couche(6, 3));
+    reseau.addCouche(Couche(9, 27));
+    reseau.addCouche(Couche(27, 3));
 }
 
 
