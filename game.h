@@ -41,11 +41,11 @@ private:
     Reseau reseau;
     float diagonale;
     QList<int> caseVisite;
-    float lastSortie;
     QList<QPoint> pasteques;
     int idPasteque;
     bool perdu;
     Game::Direction direction;
+    Game::Direction queueDirection;
 
     Sensor::ESensorType cellFree(const QPoint& p, bool ignoreFood = false) const;
     void calculSensors();
@@ -53,8 +53,8 @@ private:
     void newPasteque();
     void next();
     void initReseau();
-    void getIncs(int &incX, int &incY) const;
-    void setDirection(int incX, int incY);
+    void getIncs(const Direction &direction, int &incX, int &incY) const;
+    Game::Direction calculDirection(int incX, int incY);
 };
 
 #endif // GAME_H

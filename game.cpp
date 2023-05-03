@@ -24,6 +24,7 @@ Game::Game(int largeur, int hauteur, const Reseau::Poids &poids) {
     pasteques.append(QPoint(3, 6));
 
     direction = Game::edHaut;
+    queueDirection = Game::edHaut;
 
     idPasteque = -1;
 
@@ -39,8 +40,6 @@ Game::Game(int largeur, int hauteur, const Reseau::Poids &poids) {
 
     caseVisite.clear();
     caseVisite.append(snake[0].x() + snake[0].y() * largeur);
-
-    lastSortie = 0.0;
 
     perdu = false;
 }
@@ -73,7 +72,7 @@ bool Game::step() {
     int idCase;
     int incX, incY;
 
-    getIncs(incX, incY);
+    getIncs(direction, incX, incY);
     newTete.setX(snake[0].x() + incX);
     newTete.setY(snake[0].y() + incY);
 
@@ -82,9 +81,16 @@ bool Game::step() {
     type = cellFree(newTete);
     if(type != Sensor::estMur && type != Sensor::estSnake)
     {
+        bool first = true;
         for(i=snake.size()-1;i>=1;i--) {
+            if(first) {
+                incX = snake[i-1].x() - snake[i].x();
+                incY = snake[i-1].y() - snake[i].y();
+                queueDirection = calculDirection(incX, incY);
+            }
             snake[i].setX(snake[i-1].x());
             snake[i].setY(snake[i-1].y());
+            first = false;
         }
 
         snake[0] = newTete;
@@ -221,10 +227,13 @@ void Game::next() {
     QPoint tete = snake[0];
     float max = -1;
     int incX, incY;
+    int queueIncX, queueIncY;
     int factX = 1;
     int factY = 1;
+    int goodSortie = 0;
 
-    getIncs(incX, incY);
+    getIncs(direction, incX, incY);
+    getIncs(queueDirection, queueIncX, queueIncY);
 
     if(incX < 0) {
         factX = -1;
@@ -247,40 +256,44 @@ void Game::next() {
 
     entrees.append(incX);
     entrees.append(incY);
+    entrees.append(queueIncX);
+    entrees.append(queueIncY);
 
     entrees.append((pasteque.x() - tete.x()) / (float)(largeur - 2) * factX);
     entrees.append((pasteque.y() - tete.y()) / (float)(hauteur - 2) * factY);
 
+    sorties = reseau.eval(entrees);
+
     for(int i=0;i<sorties.size();i++) {
-        if(sorties[i] > max && sorties[i] > 0.5) {
-            if(i >= 1) {
-                if(incX != 0) {
-                    incY = (i == 1 ? -1 : 1) * incX;
-                    incX = 0;
-                } else {
-                    incX = (i == 1 ? 1 : -1) * incY;
-                    incY = 0;
-                }
-
-                setDirection(incX, incY);
-            }
-
-            lastSortie = i;
+        if(sorties[i] > max && sorties[i] > 0.5) {           
+            goodSortie = i;
             max = sorties[i];
         }
     }
 
-     sorties = reseau.eval(entrees);
+    if(goodSortie >= 1) {
+        if(incX != 0) {
+            incY = (goodSortie == 1 ? -1 : 1) * incX;
+            incX = 0;
+        } else {
+            incX = (goodSortie == 1 ? 1 : -1) * incY;
+            incY = 0;
+        }
+
+        direction = calculDirection(incX, incY);
+        if(snake.size() == 1) {
+            queueDirection = direction;
+        }
+    }
 }
 
 void Game::initReseau() {
-    reseau.addCouche(Couche(12, 24));
-    reseau.addCouche(Couche(24, 12));
-    reseau.addCouche(Couche(12, 6));
-    reseau.addCouche(Couche(6, 3));
+    reseau.addCouche(Couche(14, 14));
+    reseau.addCouche(Couche(14, 42));
+    reseau.addCouche(Couche(42, 3));
 }
 
-void Game::getIncs(int &incX, int &incY) const {
+void Game::getIncs(const Game::Direction& direction, int &incX, int &incY) const {
     switch(direction) {
     case Game::edHaut:
         incX = 0; incY = -1;
@@ -297,17 +310,18 @@ void Game::getIncs(int &incX, int &incY) const {
     }
 }
 
-void Game::setDirection(int incX, int incY) {
+Game::Direction Game::calculDirection(int incX, int incY) {
     if(incX == 0 && incY == -1) {
-        direction = Game::edHaut;
+        return Game::edHaut;
     } else if(incX == 1 && incY == 0) {
-        direction = Game::edDroite;
+        return Game::edDroite;
     } else if(incX == 0 && incY == 1) {
-        direction = Game::edBas;
+        return Game::edBas;
     } else {
-        direction = Game::edGauche;
+        return Game::edGauche;
     }
 }
+
 
 
 
