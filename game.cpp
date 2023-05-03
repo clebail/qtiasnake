@@ -176,24 +176,44 @@ void Game::calculSensors() {
         sensors.append(getFirstCellOccupe(1, 0));
         sensors.append(getFirstCellOccupe(0, 1));
         sensors.append(getFirstCellOccupe(-1, 0));
+
+        sensors.append(getFirstCellOccupe(1, -1));
+        sensors.append(getFirstCellOccupe(1, 1));
+        sensors.append(getFirstCellOccupe(-1, 1));
+        sensors.append(getFirstCellOccupe(-1, -1));
         break;
     case Game::edDroite:
         sensors.append(getFirstCellOccupe(1, 0));
         sensors.append(getFirstCellOccupe(0, 1));
         sensors.append(getFirstCellOccupe(-1, 0));
         sensors.append(getFirstCellOccupe(0, -1));
+
+        sensors.append(getFirstCellOccupe(1, 1));
+        sensors.append(getFirstCellOccupe(-1, 1));
+        sensors.append(getFirstCellOccupe(-1, -1));
+        sensors.append(getFirstCellOccupe(1, -1));
         break;
     case Game::edBas:
         sensors.append(getFirstCellOccupe(0, 1));
         sensors.append(getFirstCellOccupe(-1, 0));
         sensors.append(getFirstCellOccupe(0, -1));
         sensors.append(getFirstCellOccupe(1, 0));
+
+        sensors.append(getFirstCellOccupe(-1, 1));
+        sensors.append(getFirstCellOccupe(-1, -1));
+        sensors.append(getFirstCellOccupe(1, -1));
+        sensors.append(getFirstCellOccupe(1, 1));
         break;
     case Game::edGauche:
         sensors.append(getFirstCellOccupe(-1, 0));
         sensors.append(getFirstCellOccupe(0, -1));
         sensors.append(getFirstCellOccupe(1, 0));
         sensors.append(getFirstCellOccupe(0, 1));
+
+        sensors.append(getFirstCellOccupe(-1, -1));
+        sensors.append(getFirstCellOccupe(1, -1));
+        sensors.append(getFirstCellOccupe(1, 1));
+        sensors.append(getFirstCellOccupe(-1, 1));
         break;
     }
 
@@ -288,9 +308,9 @@ void Game::next() {
 }
 
 void Game::initReseau() {
-    reseau.addCouche(Couche(14, 14));
-    reseau.addCouche(Couche(14, 42));
-    reseau.addCouche(Couche(42, 3));
+    reseau.addCouche(Couche(18, 18));
+    reseau.addCouche(Couche(18, 54));
+    reseau.addCouche(Couche(54, 3));
 }
 
 void Game::getIncs(const Game::Direction& direction, int &incX, int &incY) const {
