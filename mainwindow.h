@@ -20,6 +20,7 @@ private:
     int idx;
     int idxGeneration;
     int bestScore;
+    int bestScoreGeneration;
     QList<Game::GameResult> generation;
     QList<Reseau::Poids> newGeneration;
     QTimer *timer;

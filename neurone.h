@@ -3,7 +3,7 @@
 
 #include <QList>
 
-#define MAX_POIDS ((float)20.0)
+#define MAX_POIDS ((float).4)
 
 class Neurone {
 public:

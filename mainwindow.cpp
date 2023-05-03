@@ -9,7 +9,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     timer->setInterval(10);
     // gameWidget->showSensors(false);
 
-    idx = bestScore = idxGeneration = 0;
+    idx = bestScore = idxGeneration = bestScoreGeneration = 0;
     newGame();
 }
 
@@ -22,7 +22,7 @@ void MainWindow::newGame(const Reseau::Poids &poids) {
     gameWidget->setGame(game);
     reseauWidget->setReseau(game.getReseau());
 
-    lblGeneration->setText(QString().number(idxGeneration+1)+QString(" / ")+QString().number(idx+1)+QString(" / ")+QString().number(SIZE_GENERATION));
+    lblGeneration->setText(QString().number(idxGeneration+1)+QString(" -- ")+QString().number(idx+1)+QString(" / ")+QString().number(SIZE_GENERATION));
 }
 
 QList<Reseau::Poids>  MainWindow::fusion() const {
@@ -107,9 +107,14 @@ void MainWindow::onTimer() {
             Game::GameResult gr = game.getResult();
 
             if(gr.score > bestScore) {
-                bestScore = gr.score;
-                lblBestScore->setText(QString().number(bestScore));
+                bestScore = gr.score;                
             }
+            if(gr.score > bestScoreGeneration) {
+                bestScoreGeneration = gr.score;
+            }
+
+            lblBestScore->setText(QString().number(bestScoreGeneration)+QString(" / ")+QString().number(bestScore));
+
             generation.append(gr);
 
             idx++;
@@ -125,6 +130,7 @@ void MainWindow::onTimer() {
             idx = 0;
             idxGeneration++;
             poids = newGeneration[idx];
+            bestScoreGeneration = 0;
 
             timer->setInterval(10+(idxGeneration * 10));
         }       

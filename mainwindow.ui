@@ -60,7 +60,7 @@
              <item>
               <widget class="QLabel" name="lblGeneration">
                <property name="text">
-                <string>0</string>
+                <string>0 -- 0 / 0</string>
                </property>
               </widget>
              </item>
@@ -100,7 +100,7 @@
              <item>
               <widget class="QLabel" name="lblBestScore">
                <property name="text">
-                <string>0</string>
+                <string>0 / 0</string>
                </property>
               </widget>
              </item>

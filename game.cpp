@@ -109,6 +109,8 @@ bool Game::step() {
         }
 
         if(nbMouvement == 100) {
+            qDebug() << "Ta race";
+            caseVisite.clear();
             perdu = true;
             return false;
         }
