@@ -285,7 +285,7 @@ void Game::next() {
     sorties = reseau.eval(entrees);
 
     for(int i=0;i<sorties.size();i++) {
-        if(sorties[i] > max && sorties[i] > 0.5) {           
+        if(sorties[i] > max && sorties[i] >= 0.5) {
             goodSortie = i;
             max = sorties[i];
         }

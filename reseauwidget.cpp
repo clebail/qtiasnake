@@ -25,7 +25,9 @@ void ReseauWidget::paintEvent(QPaintEvent *) {
 void ReseauWidget::drawReseau(QPainter *painter) {
     QList<Couche> couches = reseau.getCouches();
     QList<float> entrees = reseau.getEntress();
+    QList<float> sorties = reseau.getSorties();
     float entreesHeight = height() / (entrees.size() + 1);
+    float sortiesHeight = height() / (sorties.size() + 1);
 
     painter->setPen(QColorConstants::Black);
     for(int i=0;i<entrees.size();i++) {
@@ -56,5 +58,10 @@ void ReseauWidget::drawReseau(QPainter *painter) {
                 }
             }
         }
+    }
+
+    painter->setPen(QColorConstants::Black);
+    for(int i=0;i<sorties.size();i++) {
+        painter->drawText(QPoint(width()-60, i * sortiesHeight + sortiesHeight + 5), QString().number((double)sorties[i], 'f', 3));
     }
 }
