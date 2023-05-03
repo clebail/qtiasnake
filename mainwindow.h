@@ -29,6 +29,8 @@ private:
     QList<Reseau::Poids> fusion() const;
 
 private slots:
+    void on_pbStart_clicked();
+    void on_pbStop_clicked();
     void on_pbStep_clicked();
     void onTimer();
 };

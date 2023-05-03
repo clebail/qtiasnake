@@ -82,8 +82,18 @@ QList<Reseau::Poids>  MainWindow::fusion() const {
     return result;
 }
 
-void MainWindow::on_pbStep_clicked() {
+void MainWindow::on_pbStart_clicked() {
     timer->start();
+    pbStep->setEnabled(false);
+}
+
+void MainWindow::on_pbStop_clicked() {
+    timer->stop();
+    pbStep->setEnabled(true);
+}
+
+void MainWindow::on_pbStep_clicked() {
+    onTimer();
 }
 
 void MainWindow::onTimer() {

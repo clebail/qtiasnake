@@ -133,9 +133,16 @@
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_2">
           <item>
-           <widget class="QPushButton" name="pbStep">
+           <widget class="QPushButton" name="pbStart">
             <property name="text">
-             <string>Step</string>
+             <string>Start</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pbStop">
+            <property name="text">
+             <string>Stop</string>
             </property>
            </widget>
           </item>
@@ -151,6 +158,13 @@
              </size>
             </property>
            </spacer>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pbStep">
+            <property name="text">
+             <string>Step</string>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>
