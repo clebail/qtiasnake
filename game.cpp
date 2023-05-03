@@ -11,7 +11,7 @@ Game::Game(int largeur, int hauteur, const Reseau::Poids &poids) {
 
     diagonale = sqrt((largeur - 2) * (largeur - 2) + (hauteur - 2) * (hauteur - 2));
 
-    snake.append(QPoint(largeur/2, hauteur/2));
+    snake.append(QPoint(4, hauteur - 4));
     nbMouvement = totMouvement = 0;
 
     pasteques.append(QPoint(4, 4));
@@ -108,9 +108,7 @@ bool Game::step() {
             caseVisite.append(idCase);
         }
 
-        if(nbMouvement == 100) {
-            qDebug() << "Ta race";
-            caseVisite.clear();
+        if(nbMouvement == 50) {
             perdu = true;
             return false;
         }
@@ -176,45 +174,33 @@ void Game::calculSensors() {
     case Game::edHaut:
         sensors.append(getFirstCellOccupe(0, -1));
         sensors.append(getFirstCellOccupe(1, 0));
-        sensors.append(getFirstCellOccupe(0, 1));
         sensors.append(getFirstCellOccupe(-1, 0));
 
         sensors.append(getFirstCellOccupe(1, -1));
-        sensors.append(getFirstCellOccupe(1, 1));
-        sensors.append(getFirstCellOccupe(-1, 1));
         sensors.append(getFirstCellOccupe(-1, -1));
         break;
     case Game::edDroite:
         sensors.append(getFirstCellOccupe(1, 0));
         sensors.append(getFirstCellOccupe(0, 1));
-        sensors.append(getFirstCellOccupe(-1, 0));
         sensors.append(getFirstCellOccupe(0, -1));
 
         sensors.append(getFirstCellOccupe(1, 1));
-        sensors.append(getFirstCellOccupe(-1, 1));
-        sensors.append(getFirstCellOccupe(-1, -1));
         sensors.append(getFirstCellOccupe(1, -1));
         break;
     case Game::edBas:
         sensors.append(getFirstCellOccupe(0, 1));
         sensors.append(getFirstCellOccupe(-1, 0));
-        sensors.append(getFirstCellOccupe(0, -1));
         sensors.append(getFirstCellOccupe(1, 0));
 
         sensors.append(getFirstCellOccupe(-1, 1));
-        sensors.append(getFirstCellOccupe(-1, -1));
-        sensors.append(getFirstCellOccupe(1, -1));
         sensors.append(getFirstCellOccupe(1, 1));
         break;
     case Game::edGauche:
         sensors.append(getFirstCellOccupe(-1, 0));
         sensors.append(getFirstCellOccupe(0, -1));
-        sensors.append(getFirstCellOccupe(1, 0));
         sensors.append(getFirstCellOccupe(0, 1));
 
         sensors.append(getFirstCellOccupe(-1, -1));
-        sensors.append(getFirstCellOccupe(1, -1));
-        sensors.append(getFirstCellOccupe(1, 1));
         sensors.append(getFirstCellOccupe(-1, 1));
         break;
     }
@@ -310,9 +296,10 @@ void Game::next() {
 }
 
 void Game::initReseau() {
-    reseau.addCouche(Couche(18, 18));
-    reseau.addCouche(Couche(18, 54));
-    reseau.addCouche(Couche(54, 3));
+    reseau.addCouche(Couche(12, 12));
+    reseau.addCouche(Couche(12, 36));
+    reseau.addCouche(Couche(36, 36));
+    reseau.addCouche(Couche(36, 3));
 }
 
 void Game::getIncs(const Game::Direction& direction, int &incX, int &incY) const {
