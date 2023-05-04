@@ -7,7 +7,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(onTimer()));
     timer->setInterval(10);
-    // gameWidget->showSensors(false);
+    gameWidget->showSensors(false);
 
     idx = bestScore = idxGeneration = bestScoreGeneration = 0;
     newGame();
@@ -18,7 +18,7 @@ MainWindow::~MainWindow() {
 }
 
 void MainWindow::newGame(const Reseau::Poids &poids) {
-    game = Game(11, 11, poids);
+    game = Game(17, 17, poids);
     gameWidget->setGame(game);
     reseauWidget->setReseau(game.getReseau());
 
@@ -30,6 +30,10 @@ QList<Reseau::Poids>  MainWindow::fusion() const {
     int i1 = 0;
     int i2 = 1;
     int id = 0;
+
+    for(int i=0;i<ELITE;i++) {
+        result.append(generation[i].poids);
+    }
 
     while(result.size() < generation.size()) {
         Reseau::Poids p1 = generation[i1].poids;
@@ -60,8 +64,12 @@ QList<Reseau::Poids>  MainWindow::fusion() const {
                     }
                 }
 
-                lprn1[rand() % lpn1.size()] = Neurone::generePoid();
-                lprn2[rand() % lpn2.size()] = Neurone::generePoid();
+                if(rand() % 10 >= 5) {
+                    lprn1[rand() % lpn1.size()] = Neurone::generePoid();
+                }
+                if(rand() % 10 >= 5) {
+                    lprn2[rand() % lpn2.size()] = Neurone::generePoid();
+                }
 
                 lprc1.append(lprn1);
                 lprc2.append(lprn2);
@@ -75,8 +83,12 @@ QList<Reseau::Poids>  MainWindow::fusion() const {
         result.append(pr2);
 
         id++;
-        i1 = (id / 2) % generation.size();
-        i2 = (i2 + 1) % generation.size();
+        i1 = (id / NB_ACCOUPLE) % generation.size();
+        i2 = (i1 + 1 +id % NB_ACCOUPLE) % generation.size();
+    }
+
+    for(int i=result.size()-1;i>=SIZE_GENERATION;i--) {
+        result.removeAt(i);
     }
 
     return result;
@@ -96,12 +108,20 @@ void MainWindow::on_pbStep_clicked() {
     onTimer();
 }
 
+void MainWindow::on_pbSetInterval_clicked() {
+    timer->setInterval(spInterval->value());
+}
+
+void MainWindow::on_cbSensors_stateChanged(int) {
+    gameWidget->showSensors(cbSensors->checkState() == Qt::CheckState::Checked);
+}
+
 void MainWindow::onTimer() {
     if(game.step()) {
         gameWidget->setGame(game);
         reseauWidget->setReseau(game.getReseau());
 
-        lblMvt->setText(QString().number(game.getNbMouvement()));
+        lblMvt->setText(QString().number(game.getNbMouvement()) + QString(" -- ") + QString().number(game.getNbCaseVisite()));
     } else {
         if(idx < SIZE_GENERATION) {
             Game::GameResult gr = game.getResult();
@@ -132,7 +152,7 @@ void MainWindow::onTimer() {
             poids = newGeneration[idx];
             bestScoreGeneration = 0;
 
-            timer->setInterval(10+(idxGeneration * 10));
+            lblBestScore->setText(QString().number(bestScoreGeneration)+QString(" / ")+QString().number(bestScore));
         }       
 
         newGame(poids);

@@ -5,7 +5,9 @@
 #include <QTimer>
 #include "ui_mainwindow.h"
 
-#define SIZE_GENERATION     500
+#define SIZE_GENERATION     1000
+#define ELITE               10
+#define NB_ACCOUPLE         100
 
 class MainWindow : public QMainWindow, private Ui::MainWindow
 {
@@ -33,6 +35,8 @@ private slots:
     void on_pbStart_clicked();
     void on_pbStop_clicked();
     void on_pbStep_clicked();
+    void on_pbSetInterval_clicked();
+    void on_cbSensors_stateChanged(int);
     void onTimer();
 };
 #endif // MAINWINDOW_H

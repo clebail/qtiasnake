@@ -11,7 +11,10 @@ Game::Game(int largeur, int hauteur, const Reseau::Poids &poids) {
 
     diagonale = sqrt((largeur - 2) * (largeur - 2) + (hauteur - 2) * (hauteur - 2));
 
-    snake.append(QPoint(4, hauteur - 4));
+    snake.append(QPoint(3, hauteur - 5));
+    snake.append(QPoint(3, hauteur - 4));
+    snake.append(QPoint(3, hauteur - 3));
+    snake.append(QPoint(3, hauteur - 2));
     nbMouvement = totMouvement = 0;
 
     pasteques.append(QPoint(4, 4));
@@ -108,8 +111,7 @@ bool Game::step() {
             caseVisite.append(idCase);
         }
 
-        if(nbMouvement == 50) {
-            perdu = true;
+        if(nbMouvement == 100) {
             return false;
         }
 
@@ -144,8 +146,14 @@ Game::GameResult Game::getResult() const {
     // gr.score = pow(totMouvement, snake.size());
     // gr.score = pow(caseVisite.size(), snake.size());
     // gr.score = (snake.size() - 1) * 10 - (perdu ? 10 : 0);
-    gr.score = caseVisite.size() + (snake.size() - 1) * 100 - (perdu ? 5 : 0);
+    gr.score = totMouvement * caseVisite.size() + (snake.size() - 4) * 10000 - (perdu ? 1000 : 0);
+    // gr.score = (snake.size() - 4) * 100;
+
     return gr;
+}
+
+int Game::getNbCaseVisite() const {
+    return caseVisite.size();
 }
 
 Sensor::ESensorType Game::cellFree(const QPoint& p, bool ignoreFood) const {
@@ -224,8 +232,9 @@ Sensor Game::getFirstCellOccupe(int incX, int incY) const {
 
 void Game::newPasteque() {
     do {
-        idPasteque = (idPasteque + 1) % pasteques.size();
-        pasteque = pasteques[idPasteque];
+        pasteque = QPoint(rand() % (largeur - 2) + 1, rand() % (hauteur - 2) + 1);
+        //idPasteque = (idPasteque + 1) % pasteques.size();
+        // pasteque = pasteques[idPasteque];
     }while (cellFree(pasteque, true) != Sensor::estNone);
 }
 
@@ -273,7 +282,7 @@ void Game::next() {
     sorties = reseau.eval(entrees);
 
     for(int i=0;i<sorties.size();i++) {
-        if(sorties[i] > max && sorties[i] >= 0.5) {
+        if(sorties[i] > max && sorties[i] >= SEUIL) {
             goodSortie = i;
             max = sorties[i];
         }
@@ -299,7 +308,8 @@ void Game::initReseau() {
     reseau.addCouche(Couche(12, 12));
     reseau.addCouche(Couche(12, 36));
     reseau.addCouche(Couche(36, 36));
-    reseau.addCouche(Couche(36, 3));
+    reseau.addCouche(Couche(36, 12));
+    reseau.addCouche(Couche(12, 3));
 }
 
 void Game::getIncs(const Game::Direction& direction, int &incX, int &incY) const {

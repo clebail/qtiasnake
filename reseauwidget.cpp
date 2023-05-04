@@ -53,7 +53,7 @@ void ReseauWidget::drawReseau(QPainter *painter) {
                     Neurone neurone = *n;
                     int y = j * neuroneHeight + neuroneHeight - RAYON;
 
-                    painter->setBrush(neurone.getValue() >= 0.5 ? QColorConstants::DarkGreen : QColorConstants::White);
+                    painter->setBrush(neurone.getValue() >= SEUIL ? QColorConstants::DarkGreen : QColorConstants::White);
                     painter->drawEllipse(x, y, DIAM, DIAM);
                 }
             }

@@ -30,6 +30,7 @@ public:
     const Reseau& getReseau() const;
     void setReseau(const Reseau& reseau);
     Game::GameResult getResult() const;
+    int getNbCaseVisite() const;
 private:
     int largeur;
     int hauteur;
