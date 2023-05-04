@@ -245,28 +245,15 @@ void Game::next() {
     float max = -1;
     int incX, incY;
     int queueIncX, queueIncY;
-    int factX = 1;
-    int factY = 1;
     int goodSortie = 0;
 
     getIncs(direction, incX, incY);
     getIncs(queueDirection, queueIncX, queueIncY);
 
-    if(incX < 0) {
-        factX = -1;
-    }
-
-    if(incY < 0) {
-        factY = -1;
-    }
-
     for(int i=0;i<sensors.size();i++) {
         if(sensors[i].getType() != Sensor::estPasteque) {
-            int diffX = sensors[i].getPoint().x() - tete.x();
-            int diffY = sensors[i].getPoint().y() - tete.y();
-
-            entrees.append(diffX / (float)(largeur - 2) * factX);
-            entrees.append(diffY / (float)(hauteur - 2) * factY);
+            entrees.append(abs(sensors[i].getPoint().x() - tete.x()));
+            entrees.append(abs(sensors[i].getPoint().y() - tete.y()));
         }
     }
 
@@ -276,8 +263,8 @@ void Game::next() {
     entrees.append(queueIncX);
     entrees.append(queueIncY);
 
-    entrees.append((pasteque.x() - tete.x()) / (float)(largeur - 2) * factX);
-    entrees.append((pasteque.y() - tete.y()) / (float)(hauteur - 2) * factY);
+    entrees.append(abs(pasteque.x() - tete.x()));
+    entrees.append(abs(pasteque.y() - tete.y()));
 
     sorties = reseau.eval(entrees);
 
