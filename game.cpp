@@ -146,7 +146,7 @@ Game::GameResult Game::getResult() const {
     // gr.score = pow(totMouvement, snake.size());
     // gr.score = pow(caseVisite.size(), snake.size());
     // gr.score = (snake.size() - 1) * 10 - (perdu ? 10 : 0);
-    gr.score = totMouvement * caseVisite.size() + (snake.size() - 4) * 10000 - (perdu ? 1000 : 0);
+    gr.score = (totMouvement * caseVisite.size() + (snake.size() - 4) * 10000) * (perdu ? 0 : 1);
     // gr.score = (snake.size() - 4) * 100;
 
     return gr;
