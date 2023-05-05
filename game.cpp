@@ -251,9 +251,15 @@ void Game::next() {
     getIncs(queueDirection, queueIncX, queueIncY);
 
     for(int i=0;i<sensors.size();i++) {
-        if(sensors[i].getType() != Sensor::estPasteque) {
-            entrees.append(abs(sensors[i].getPoint().x() - tete.x()));
-            entrees.append(abs(sensors[i].getPoint().y() - tete.y()));
+        float diffX = (float)abs(sensors[i].getPoint().x() - tete.x());
+        float diffY = (float)abs(sensors[i].getPoint().y() - tete.y());
+
+        if(diffX == 0.0) {
+            entrees.append(diffY);
+        } else if(diffY == 0.0) {
+            entrees.append(diffX);
+        } else {
+            entrees.append(sqrt(diffX * diffX + diffY * diffY));
         }
     }
 
@@ -262,9 +268,6 @@ void Game::next() {
     entrees.append(incY);
     entrees.append(queueIncX);
     entrees.append(queueIncY);
-
-    entrees.append(abs(pasteque.x() - tete.x()));
-    entrees.append(abs(pasteque.y() - tete.y()));
 
     sorties = reseau.eval(entrees);
 
@@ -292,11 +295,11 @@ void Game::next() {
 }
 
 void Game::initReseau() {
-    reseau.addCouche(Couche(12, 12));
-    reseau.addCouche(Couche(12, 36));
-    reseau.addCouche(Couche(36, 36));
-    reseau.addCouche(Couche(36, 12));
-    reseau.addCouche(Couche(12, 3));
+    reseau.addCouche(Couche(10, 10));
+    reseau.addCouche(Couche(10, 30));
+    reseau.addCouche(Couche(30, 30));
+    reseau.addCouche(Couche(30, 10));
+    reseau.addCouche(Couche(10, 3));
 }
 
 void Game::getIncs(const Game::Direction& direction, int &incX, int &incY) const {
