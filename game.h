@@ -48,9 +48,9 @@ private:
     Game::Direction direction;
     Game::Direction queueDirection;
 
-    Sensor::ESensorType cellFree(const QPoint& p, bool ignoreFood = false) const;
+    Sensor::ESensorType cellFree(const QPoint& p, const Sensor::ESensorType& toIgnore = Sensor::estNone) const;
     void calculSensors();
-    Sensor getFirstCellOccupe(int incX, int incY) const;
+    Sensor getFirstCellOccupe(int incX, int incY, const Sensor::ESensorType& toIgnore = Sensor::estNone) const;
     void newPasteque();
     void next();
     void initReseau();

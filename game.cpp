@@ -26,7 +26,7 @@ Game::Game(int largeur, int hauteur, const Reseau::Poids &poids) {
     pasteques.append(QPoint(6, 3));
     pasteques.append(QPoint(3, 6));
 
-    direction = Game::edHaut;
+    direction = Game::edDroite;
     queueDirection = Game::edHaut;
 
     idPasteque = -1;
@@ -156,20 +156,22 @@ int Game::getNbCaseVisite() const {
     return caseVisite.size();
 }
 
-Sensor::ESensorType Game::cellFree(const QPoint& p, bool ignoreFood) const {
+Sensor::ESensorType Game::cellFree(const QPoint& p, const Sensor::ESensorType &toIgnore) const {
     int x = p.x();
     int y = p.y();
 
     if(x > 0 && x < largeur - 1 && y > 0 && y < hauteur - 1) {
         QList<QPoint>::const_iterator i;
 
-        for(i=snake.begin();i!=snake.end();++i) {
-            if((*i).x() == x && (*i).y() == y) {
-                return Sensor::estSnake;
+        if(toIgnore != Sensor::estSnake) {
+            for(i=snake.begin();i!=snake.end();++i) {
+                if((*i).x() == x && (*i).y() == y) {
+                    return Sensor::estSnake;
+                }
             }
         }
 
-        return !ignoreFood && p == pasteque ? Sensor::estPasteque : Sensor::estNone;
+        return toIgnore != Sensor::estPasteque && p == pasteque ? Sensor::estPasteque : Sensor::estNone;
     }
 
     return Sensor::estMur;
@@ -177,23 +179,22 @@ Sensor::ESensorType Game::cellFree(const QPoint& p, bool ignoreFood) const {
 
 void Game::calculSensors() {
     sensors.clear();
+    QPoint tete = snake[0];
 
     switch(direction) {
     case Game::edHaut:
-        sensors.append(getFirstCellOccupe(0, -1));
-        sensors.append(getFirstCellOccupe(1, 0));
-        sensors.append(getFirstCellOccupe(-1, 0));
-
-        sensors.append(getFirstCellOccupe(1, -1));
-        sensors.append(getFirstCellOccupe(-1, -1));
+        sensors.append(Sensor(QPoint(0, tete.y()), Sensor::estMur));
+        sensors.append(Sensor(QPoint(qMax(0, tete.x() - tete.y()), qMax(0, tete.y()- tete.x())), Sensor::estMur));
+        sensors.append(Sensor(QPoint(tete.x(), 0), Sensor::estMur));
+        sensors.append(Sensor(QPoint(qMin(largeur - 1, tete.x() + tete.y()), qMax(0, tete.y() - largeur - tete.x() - 1)), Sensor::estMur));
+        sensors.append(Sensor(QPoint(largeur - 1, tete.y()), Sensor::estMur));
         break;
     case Game::edDroite:
-        sensors.append(getFirstCellOccupe(1, 0));
-        sensors.append(getFirstCellOccupe(0, 1));
-        sensors.append(getFirstCellOccupe(0, -1));
-
-        sensors.append(getFirstCellOccupe(1, 1));
-        sensors.append(getFirstCellOccupe(1, -1));
+        sensors.append(Sensor(QPoint(tete.x(), 0), Sensor::estMur));
+        sensors.append(Sensor(QPoint(qMin(largeur - 1, tete.x() + tete.y()), qMax(0, tete.y() - largeur + tete.x() + 1)), Sensor::estMur));
+        sensors.append(Sensor(QPoint(largeur - 1, tete.y()), Sensor::estMur));
+        sensors.append(Sensor(QPoint(largeur-1, hauteur-1), Sensor::estMur));
+        sensors.append(Sensor(QPoint(hauteur - 1, tete.y()), Sensor::estMur));
         break;
     case Game::edBas:
         sensors.append(getFirstCellOccupe(0, 1));
@@ -216,14 +217,13 @@ void Game::calculSensors() {
     sensors.append(Sensor(pasteque, Sensor::estPasteque));
 }
 
-Sensor Game::getFirstCellOccupe(int incX, int incY) const {
+Sensor Game::getFirstCellOccupe(int incX, int incY, const Sensor::ESensorType& toIgnore) const {
     QPoint tete = snake.at(0);
     QPoint p;
     Sensor::ESensorType type;
 
-    // en haut à gauche
     p = QPoint(tete.x() + incX, tete.y() +incY);
-    while((type = cellFree(p, true)) == Sensor::estNone) {
+    while((type = cellFree(p, toIgnore)) == Sensor::estNone) {
        p = QPoint(p.x() + incX, p.y() +incY);
     }
 
@@ -231,11 +231,14 @@ Sensor Game::getFirstCellOccupe(int incX, int incY) const {
 }
 
 void Game::newPasteque() {
+    QPoint p;
     do {
-        pasteque = QPoint(rand() % (largeur - 2) + 1, rand() % (hauteur - 2) + 1);
+        p = QPoint(rand() % (largeur - 2) + 1, rand() % (hauteur - 2) + 1);
         //idPasteque = (idPasteque + 1) % pasteques.size();
         // pasteque = pasteques[idPasteque];
-    }while (cellFree(pasteque, true) != Sensor::estNone);
+    }while (cellFree(p) != Sensor::estNone);
+
+    pasteque = p;
 }
 
 void Game::next() {
@@ -278,7 +281,7 @@ void Game::next() {
         }
     }
 
-    if(goodSortie >= 1) {
+    /*if(goodSortie >= 1) {
         if(incX != 0) {
             incY = (goodSortie == 1 ? -1 : 1) * incX;
             incX = 0;
@@ -291,7 +294,7 @@ void Game::next() {
         if(snake.size() == 1) {
             queueDirection = direction;
         }
-    }
+    }*/
 }
 
 void Game::initReseau() {
