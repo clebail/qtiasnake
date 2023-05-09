@@ -51,6 +51,7 @@ private:
     Sensor::ESensorType cellFree(const QPoint& p, const Sensor::ESensorType& toIgnore = Sensor::estNone) const;
     void calculSensors();
     Sensor getFirstCellOccupe(int incX, int incY, const Sensor::ESensorType& toIgnore = Sensor::estNone) const;
+    void addSensorsForDirection(int incX, int incY);
     void newPasteque();
     void next();
     void initReseau();
