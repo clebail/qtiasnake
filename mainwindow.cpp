@@ -10,6 +10,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     gameWidget->showSensors(false);
 
     idx = bestScore = idxGeneration = bestScoreGeneration = 0;
+    showGame = true;
+
     newGame();
 }
 
@@ -19,8 +21,10 @@ MainWindow::~MainWindow() {
 
 void MainWindow::newGame(const Reseau::Poids &poids) {
     game = Game(17, 17, poids);
-    gameWidget->setGame(game);
-    reseauWidget->setReseau(game.getReseau());
+    if(showGame) {
+        gameWidget->setGame(game);
+        reseauWidget->setReseau(game.getReseau());
+    }
 
     lblGeneration->setText(QString().number(idxGeneration+1)+QString(" -- ")+QString().number(idx+1)+QString(" / ")+QString().number(SIZE_GENERATION));
 }
@@ -116,12 +120,18 @@ void MainWindow::on_cbSensors_stateChanged(int) {
     gameWidget->showSensors(cbSensors->checkState() == Qt::CheckState::Checked);
 }
 
+void MainWindow::on_cbShowGame_stateChanged(int) {
+    showGame = cbShowGame->checkState() == Qt::CheckState::Checked;
+}
+
 void MainWindow::onTimer() {
     if(game.step()) {
-        gameWidget->setGame(game);
-        reseauWidget->setReseau(game.getReseau());
+        if(showGame || idx < ELITE) {
+            gameWidget->setGame(game);
+            reseauWidget->setReseau(game.getReseau());
+        }
 
-        lblMvt->setText(QString().number(game.getNbMouvement()) + QString(" -- ") + QString().number(game.getNbCaseVisite()));
+        lblMvt->setText(QString().number(game.getTotMouvement()));
     } else {
         if(idx < SIZE_GENERATION) {
             Game::GameResult gr = game.getResult();

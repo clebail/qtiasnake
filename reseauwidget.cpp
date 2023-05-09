@@ -47,7 +47,7 @@ void ReseauWidget::drawReseau(QPainter *painter) {
                 QList<Neurone>::const_iterator n;
                 int x = i * coucheWidth + coucheWidth - RAYON;
                 int j;
-                float neuroneHeight = height() / (neurones.size() + 1);
+                float neuroneHeight = height() / (float)(neurones.size() + 1);
 
                 for(j=0, n=neurones.begin();n!=neurones.end();++n, j++) {
                     Neurone neurone = *n;

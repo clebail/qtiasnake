@@ -6,8 +6,8 @@
 #include "ui_mainwindow.h"
 
 #define SIZE_GENERATION     1000
-#define ELITE               10
-#define NB_ACCOUPLE         100
+#define NB_ACCOUPLE         (SIZE_GENERATION / 10)
+#define ELITE               (NB_ACCOUPLE / 10)
 
 class MainWindow : public QMainWindow, private Ui::MainWindow
 {
@@ -23,6 +23,7 @@ private:
     int idxGeneration;
     int bestScore;
     int bestScoreGeneration;
+    bool showGame;
     QList<Game::GameResult> generation;
     QList<Reseau::Poids> newGeneration;
     QTimer *timer;
@@ -37,6 +38,7 @@ private slots:
     void on_pbStep_clicked();
     void on_pbSetInterval_clicked();
     void on_cbSensors_stateChanged(int);
+    void on_cbShowGame_stateChanged(int);
     void onTimer();
 };
 #endif // MAINWINDOW_H

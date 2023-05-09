@@ -26,7 +26,7 @@ public:
     const QList<Sensor> &getSensors() const;
     const QPoint& getPasteque() const;
     bool step();
-    int getNbMouvement() const;
+    int getTotMouvement() const;
     const Reseau& getReseau() const;
     void setReseau(const Reseau& reseau);
     Game::GameResult getResult() const;
@@ -42,11 +42,11 @@ private:
     Reseau reseau;
     float diagonale;
     QList<int> caseVisite;
-    QList<QPoint> pasteques;
     int idPasteque;
     bool perdu;
     Game::Direction direction;
     Game::Direction queueDirection;
+    int maxMouvement;
 
     Sensor::ESensorType cellFree(const QPoint& p, const Sensor::ESensorType& toIgnore = Sensor::estNone) const;
     void calculSensors();

@@ -9,22 +9,13 @@ Game::Game(int largeur, int hauteur, const Reseau::Poids &poids) {
     this->largeur = largeur;
     this->hauteur = hauteur;
 
-    diagonale = sqrt((largeur - 2) * (largeur - 2) + (hauteur - 2) * (hauteur - 2));
+    maxMouvement = (largeur - 2) * (hauteur - 2);
 
     snake.append(QPoint(3, hauteur - 5));
     snake.append(QPoint(3, hauteur - 4));
     snake.append(QPoint(3, hauteur - 3));
     snake.append(QPoint(3, hauteur - 2));
     nbMouvement = totMouvement = 0;
-
-    pasteques.append(QPoint(4, 4));
-    pasteques.append(QPoint(7, 7));
-    pasteques.append(QPoint(7, 4));
-    pasteques.append(QPoint(4, 7));
-    pasteques.append(QPoint(3, 3));
-    pasteques.append(QPoint(6, 6));
-    pasteques.append(QPoint(6, 3));
-    pasteques.append(QPoint(3, 6));
 
     direction = Game::edHaut;
     queueDirection = Game::edHaut;
@@ -97,21 +88,23 @@ bool Game::step() {
         }
 
         snake[0] = newTete;
-        nbMouvement++;
-        totMouvement++;
+        nbMouvement++;       
 
         if(type == Sensor::estPasteque) {
             snake.append(last);
 
             newPasteque();
             nbMouvement = 0;
+
+            caseVisite.clear();
         }
 
         if(!caseVisite.contains(idCase)) {
             caseVisite.append(idCase);
+            totMouvement++;
         }
 
-        if(nbMouvement == 100) {
+        if(nbMouvement == maxMouvement) {
             return false;
         }
 
@@ -127,7 +120,7 @@ bool Game::step() {
     return false;
 }
 
-int Game::getNbMouvement() const {
+int Game::getTotMouvement() const {
     return totMouvement;
 }
 
@@ -146,7 +139,7 @@ Game::GameResult Game::getResult() const {
     // gr.score = pow(totMouvement, snake.size());
     // gr.score = pow(caseVisite.size(), snake.size());
     // gr.score = (snake.size() - 1) * 10 - (perdu ? 10 : 0);
-    gr.score = (totMouvement * caseVisite.size() + (snake.size() - 4) * 10000) * (perdu ? 0 : 1);
+    gr.score = (totMouvement + (snake.size() - 4) * 10000) * (perdu ? 0 : 1);
     // gr.score = (snake.size() - 4) * 100;
 
     return gr;
@@ -187,6 +180,9 @@ void Game::calculSensors() {
         addSensorsForDirection(0, -1);
         addSensorsForDirection(1, -1);
         addSensorsForDirection(1, 0);
+        addSensorsForDirection(1, 1);
+        addSensorsForDirection(0, 1);
+        addSensorsForDirection(-1, 1);
         break;
     case Game::edDroite:
         addSensorsForDirection(0, -1);
@@ -194,6 +190,9 @@ void Game::calculSensors() {
         addSensorsForDirection(1, 0);
         addSensorsForDirection(1, 1);
         addSensorsForDirection(0, 1);
+        addSensorsForDirection(-1, 1);
+        addSensorsForDirection(-1, 0);
+        addSensorsForDirection(-1, -1);
         break;
     case Game::edBas:
         addSensorsForDirection(1, 0);
@@ -201,6 +200,9 @@ void Game::calculSensors() {
         addSensorsForDirection(0, 1);
         addSensorsForDirection(-1, 1);
         addSensorsForDirection(-1, 0);
+        addSensorsForDirection(-1, -1);
+        addSensorsForDirection(0, -1);
+        addSensorsForDirection(1, -1);
         break;
     case Game::edGauche:
         addSensorsForDirection(0, 1);
@@ -208,6 +210,9 @@ void Game::calculSensors() {
         addSensorsForDirection(-1, 0);
         addSensorsForDirection(-1, -1);
         addSensorsForDirection(0, -1);
+        addSensorsForDirection(1, -1);
+        addSensorsForDirection(1, 0);
+        addSensorsForDirection(1, 1);
         break;
     }
 }
@@ -258,8 +263,6 @@ void Game::newPasteque() {
     QPoint p;
     do {
         p = QPoint(rand() % (largeur - 2) + 1, rand() % (hauteur - 2) + 1);
-        //idPasteque = (idPasteque + 1) % pasteques.size();
-        // pasteque = pasteques[idPasteque];
     }while (cellFree(p) != Sensor::estNone);
 
     pasteque = p;
@@ -327,11 +330,10 @@ void Game::next() {
 }
 
 void Game::initReseau() {
-    reseau.addCouche(Couche(19, 19));
-    reseau.addCouche(Couche(19, 57));
-    reseau.addCouche(Couche(57, 57));
-    reseau.addCouche(Couche(57, 19));
-    reseau.addCouche(Couche(19, 3));
+    reseau.addCouche(Couche(28, 28));
+    reseau.addCouche(Couche(28, 84));
+    reseau.addCouche(Couche(84, 28));
+    reseau.addCouche(Couche(28, 3));
 }
 
 void Game::getIncs(const Game::Direction& direction, int &incX, int &incY) const {
