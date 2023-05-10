@@ -137,8 +137,8 @@ void MainWindow::on_pbSave_clicked() {
         QJsonArray generationData;
         QFile file(fileName);
 
-        for(int i=0;i<generation.size();i++) {
-            Reseau::Poids poids = generation[i].poids;
+        for(int i=0;i<newGeneration.size();i++) {
+            Reseau::Poids poids = newGeneration[i];
             QJsonArray generationMemberData;
 
             for(int j=0;j<poids.size();j++) {
