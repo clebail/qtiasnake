@@ -167,7 +167,7 @@ void MainWindow::on_pbSave_clicked() {
         json["generation_idx"] = idxGeneration;
         json["generation_data"] = generationData;
 
-        if (file.open(QIODevice::ReadWrite)) {
+        if (file.open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text)) {
             QTextStream stream(&file);
             QJsonDocument document;
             document.setObject(json);
@@ -242,12 +242,6 @@ void MainWindow::on_pbLoad_clicked() {
 void MainWindow::onTimer() {
     if(game.step()) {
         if(showGame || idx < ELITE) {
-            if(idx < ELITE) {
-                timer->setInterval(50);
-            } else {
-                timer->setInterval(spInterval->value());
-            }
-
             gameWidget->setGame(game);
             reseauWidget->setReseau(game.getReseau());
         }
