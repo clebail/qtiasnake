@@ -26,7 +26,7 @@ Game::Game(int largeur, int hauteur, const Reseau::Poids &poids) {
 
     calculSensors();
 
-   if(poids.size() == 0) {
+    if(poids.size() == 0) {
         initReseau();
     } else {
         reseau = Reseau(poids);

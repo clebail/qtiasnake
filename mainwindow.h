@@ -39,6 +39,8 @@ private slots:
     void on_pbSetInterval_clicked();
     void on_cbSensors_stateChanged(int);
     void on_cbShowGame_stateChanged(int);
+    void on_pbSave_clicked();
+    void on_pbLoad_clicked();
     void onTimer();
 };
 #endif // MAINWINDOW_H

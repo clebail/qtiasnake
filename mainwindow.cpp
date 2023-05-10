@@ -1,3 +1,8 @@
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QJsonValue>
+#include <QFileDialog>
 #include <QtDebug>
 #include "mainwindow.h"
 
@@ -122,6 +127,116 @@ void MainWindow::on_cbSensors_stateChanged(int) {
 
 void MainWindow::on_cbShowGame_stateChanged(int) {
     showGame = cbShowGame->checkState() == Qt::CheckState::Checked;
+}
+
+void MainWindow::on_pbSave_clicked() {
+    QString fileName = QFileDialog::getSaveFileName(this, tr("Sauvegarde sous"), "", tr("Fichier json (*.json)"));
+
+    if(!fileName.isEmpty()) {
+        QJsonObject json;
+        QJsonArray generationData;
+        QFile file(fileName);
+
+        for(int i=0;i<generation.size();i++) {
+            Reseau::Poids poids = generation[i].poids;
+            QJsonArray generationMemberData;
+
+            for(int j=0;j<poids.size();j++) {
+                QList<QList<float> > couchePoids = poids[j];
+                QJsonArray couchePoidsData;
+
+                for(int k=0;k<couchePoids.size();k++) {
+                    QList<float> neuronePoids = couchePoids[k];
+                    QJsonArray neuronePoidsData;
+
+                    for(int l=0;l<neuronePoids.size();l++) {
+                        float f = neuronePoids[l];
+
+                        neuronePoidsData.append(QJsonValue(f));
+                    }
+
+                    couchePoidsData.append(neuronePoidsData);
+                }
+
+                generationMemberData.append(couchePoidsData);
+            }
+
+            generationData.append(generationMemberData);
+        }
+
+        json["generation_idx"] = idxGeneration;
+        json["generation_data"] = generationData;
+
+        if (file.open(QIODevice::ReadWrite)) {
+            QTextStream stream(&file);
+            QJsonDocument document;
+            document.setObject(json);
+            QByteArray bytes = document.toJson(QJsonDocument::Indented);
+
+            stream << bytes;
+
+            file.close();
+        }
+    }
+}
+
+void MainWindow::on_pbLoad_clicked() {
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Ouvrir"), "", tr("Fichier json (*.json)"));
+
+    if(!fileName.isEmpty()) {
+        QFile file(fileName);
+        if (file.open(QIODevice::ReadOnly)) {
+            QByteArray bytes = file.readAll();
+            file.close();
+
+            QJsonParseError jsonError;
+            QJsonDocument document = QJsonDocument::fromJson(bytes, &jsonError);
+            if(jsonError.error == QJsonParseError::NoError )
+            {
+                if(document.isObject())
+                {
+                    QJsonObject jsonObj = document.object();
+
+                    if(jsonObj.contains("generation_data") && jsonObj.contains("generation_idx")) {
+                        QJsonArray generationData = jsonObj["generation_data"].toArray();
+                        QJsonArray::Iterator i;
+
+                        newGeneration.clear();
+                        for(i=generationData.begin();i!=generationData.end();++i) {
+                            QJsonArray generationMemberData = (*i).toArray();
+                            QJsonArray::Iterator j;
+                            Reseau::Poids poids;
+
+                           for(j=generationMemberData.begin();j!=generationMemberData.end();++j) {
+                               QJsonArray couchePoidsData = (*j).toArray();
+                               QJsonArray::Iterator k;
+                               QList<QList<float> > couchePoids;
+
+                               for(k=couchePoidsData.begin();k!=couchePoidsData.end();++k) {
+                                   QJsonArray neuronePoidsData = (*k).toArray();
+                                   QJsonArray::Iterator l;
+                                   QList<float> neuronePoids;
+
+                                   for(l=neuronePoidsData.begin();l!=neuronePoidsData.end();++l) {
+                                        neuronePoids.append((*l).toDouble());
+                                   }
+
+                                   couchePoids.append(neuronePoids);
+                               }
+
+                               poids.append(couchePoids);
+                           }
+
+                           newGeneration.append(poids);
+                        }
+
+                        idxGeneration = jsonObj["generation_idx"].toInt();
+                        idx = 0;
+                    }
+                }
+            }
+        }
+    }
 }
 
 void MainWindow::onTimer() {
