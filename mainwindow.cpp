@@ -242,6 +242,12 @@ void MainWindow::on_pbLoad_clicked() {
 void MainWindow::onTimer() {
     if(game.step()) {
         if(showGame || idx < ELITE) {
+            if(idx < ELITE) {
+                timer->setInterval(50);
+            } else {
+                timer->setInterval(spInterval->value());
+            }
+
             gameWidget->setGame(game);
             reseauWidget->setReseau(game.getReseau());
         }
