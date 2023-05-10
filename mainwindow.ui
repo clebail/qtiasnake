@@ -84,7 +84,7 @@
              <item>
               <widget class="QLabel" name="lblMvt">
                <property name="text">
-                <string>0</string>
+                <string>0 -- 0 / 0</string>
                </property>
               </widget>
              </item>

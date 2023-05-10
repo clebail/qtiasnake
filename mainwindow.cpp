@@ -246,7 +246,7 @@ void MainWindow::onTimer() {
             reseauWidget->setReseau(game.getReseau());
         }
 
-        lblMvt->setText(QString().number(game.getTotMouvement()));
+        lblMvt->setText(QString().number(game.getTotMouvement())+QString(" -- ")+QString().number(game.getNbMouvement())+QString(" / ")+QString().number(game.getMaxMouvement()));
     } else {
         if(idx < SIZE_GENERATION) {
             Game::GameResult gr = game.getResult();

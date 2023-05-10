@@ -27,6 +27,8 @@ public:
     const QPoint& getPasteque() const;
     bool step();
     int getTotMouvement() const;
+    int getNbMouvement() const;
+    int getMaxMouvement() const;
     const Reseau& getReseau() const;
     void setReseau(const Reseau& reseau);
     Game::GameResult getResult() const;

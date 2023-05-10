@@ -124,6 +124,14 @@ int Game::getTotMouvement() const {
     return totMouvement;
 }
 
+int Game::getNbMouvement() const {
+    return nbMouvement;
+}
+
+int Game::getMaxMouvement() const {
+    return maxMouvement;
+}
+
 const Reseau& Game::getReseau() const {
     return reseau;
 }
@@ -278,16 +286,17 @@ void Game::next() {
 
     for(int i=0;i<sensors.size();i++) {
         QPoint p = sensors[i].getPoint();
-        if(!p.isNull()) {
-            float diffX = (float)abs(p.x() - tete.x());
-            float diffY = (float)abs(p.y() - tete.y());
 
-            if(diffX == 0.0) {
+        if(!p.isNull()) {
+            int diffX = abs(p.x() - tete.x());
+            int diffY = abs(p.y() - tete.y());
+
+            if(diffX == 0) {
                 entrees.append(diffY);
-            } else if(diffY == 0.0) {
+            } else if(diffY == 0) {
                 entrees.append(diffX);
             } else {
-                entrees.append(sqrt(diffX * diffX + diffY * diffY));
+                entrees.append(sqrt((float)(diffX * diffX + diffY * diffY)));
             }
         } else {
             entrees.append(0);
