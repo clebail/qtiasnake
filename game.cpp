@@ -12,9 +12,6 @@ Game::Game(int largeur, int hauteur, const Reseau::Poids &poids) {
     maxMouvement = (largeur - 2) * (hauteur - 2);
 
     snake.append(QPoint(largeur/2, hauteur/2));
-    /*snake.append(QPoint(largeur/2, hauteur/2 +1));
-    snake.append(QPoint(largeur/2, hauteur/2 +2));
-    snake.append(QPoint(largeur/2, hauteur/2 +3));*/
     nbMouvement = totMouvement = 0;
 
     direction = Game::edHaut;
