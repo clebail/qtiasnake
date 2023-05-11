@@ -6,9 +6,11 @@
 #include "sensor.h"
 #include "reseau.h"
 
+#define NB_DIRECTION            4
+
 class Game {
 public:
-    typedef enum { edHaut, edDroite, edBas, edGauche } Direction;
+    typedef enum { edHaut = 0, edDroite = 1, edBas = 2, edGauche = 3 } Direction;
 
     typedef struct _GameResult {
         Reseau::Poids poids;

@@ -279,7 +279,8 @@ void Game::next() {
     float max = -1;
     int incX, incY;
     int queueIncX, queueIncY;
-    int goodSortie = 0;
+    int incS = 0;
+    int newDir;
 
     getIncs(direction, incX, incY);
     getIncs(queueDirection, queueIncX, queueIncY);
@@ -313,32 +314,31 @@ void Game::next() {
 
     for(int i=0;i<sorties.size();i++) {
         if(sorties[i] > max && sorties[i] >= SEUIL) {
-            goodSortie = i;
             max = sorties[i];
+            incS = i == 0 ? 1 : -1;
         }
     }
 
-    if(goodSortie >= 1) {
-        if(incX != 0) {
-            incY = (goodSortie == 1 ? -1 : 1) * incX;
-            incX = 0;
-        } else {
-            incX = (goodSortie == 1 ? 1 : -1) * incY;
-            incY = 0;
-        }
+    newDir = (int)direction + incS;
+    if(newDir == -1) {
+        newDir = NB_DIRECTION - 1;
+    }
+    if(newDir == NB_DIRECTION) {
+        newDir = 0;
+    }
 
-        direction = calculDirection(incX, incY);
-        if(snake.size() == 1) {
-            queueDirection = direction;
-        }
+    direction = (Game::Direction)newDir;
+
+    if(snake.size() == 1) {
+        queueDirection = direction;
     }
 }
 
 void Game::initReseau() {
     reseau.addCouche(Couche(28, 28));
-    reseau.addCouche(Couche(28, 84));
-    reseau.addCouche(Couche(84, 28));
-    reseau.addCouche(Couche(28, 3));
+    reseau.addCouche(Couche(28, 56));
+    reseau.addCouche(Couche(56, 28));
+    reseau.addCouche(Couche(28, 2));
 }
 
 void Game::getIncs(const Game::Direction& direction, int &incX, int &incY) const {
