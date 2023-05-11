@@ -25,11 +25,9 @@ QList<float> Couche::eval(const QList<float>& entrees, bool last) {
 
     for(int i=0;i<neurones.size();i++) {
         float sumEntrees;
-        float value;
 
         neurones[i].eval(entrees, sumEntrees);
         sumEntrees = abs(sumEntrees);
-        value = neurones[i].getValue();
 
         if(sumEntrees > max) {
             max = sumEntrees;
