@@ -31,7 +31,7 @@ void MainWindow::newGame(const Reseau::Poids &poids) {
         reseauWidget->setReseau(game.getReseau());
     }
 
-    lblGeneration->setText(QString().number(idxGeneration+1)+QString(" -- ")+QString().number(idx+1)+QString(" / ")+QString().number(SIZE_GENERATION));
+    lblGeneration->setText(QString().number(idxGeneration+1)+QString(" -- ")+QString().number(idx)+QString(" / ")+QString().number(SIZE_GENERATION));
 }
 
 QList<Reseau::Poids>  MainWindow::fusion() const {

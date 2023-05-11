@@ -1,3 +1,4 @@
+#include <QtDebug>
 #include "couche.h"
 
 Couche::Couche(int nbEntree, int nbSortie) {
@@ -17,11 +18,35 @@ Couche::Couche(QList<QList<float> > poids) {
     }
 }
 
-QList<float> Couche::eval(const QList<float>& entrees) {
+QList<float> Couche::eval(const QList<float>& entrees, bool last) {
     QList<float> result;
+    float max = 0;
+    int active = 0;
 
     for(int i=0;i<neurones.size();i++) {
-        neurones[i].eval(entrees);
+        float sumEntrees;
+        float value;
+
+        neurones[i].eval(entrees, sumEntrees);
+        sumEntrees = abs(sumEntrees);
+        value = neurones[i].getValue();
+
+        if(sumEntrees > max) {
+            max = sumEntrees;
+            active = i;
+        }
+    }
+
+    for(int i=0;i<neurones.size();i++) {
+        if(last)
+        {
+            if(i == active) {
+                neurones[i].active();
+            } else {
+                neurones[i].reset();
+            }
+        }
+
         result.append(neurones[i].getValue());
     }
     

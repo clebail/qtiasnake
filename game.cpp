@@ -11,10 +11,10 @@ Game::Game(int largeur, int hauteur, const Reseau::Poids &poids) {
 
     maxMouvement = (largeur - 2) * (hauteur - 2);
 
-    snake.append(QPoint(3, hauteur - 5));
-    snake.append(QPoint(3, hauteur - 4));
-    snake.append(QPoint(3, hauteur - 3));
-    snake.append(QPoint(3, hauteur - 2));
+    snake.append(QPoint(largeur/2, hauteur/2));
+    /*snake.append(QPoint(largeur/2, hauteur/2 +1));
+    snake.append(QPoint(largeur/2, hauteur/2 +2));
+    snake.append(QPoint(largeur/2, hauteur/2 +3));*/
     nbMouvement = totMouvement = 0;
 
     direction = Game::edHaut;
@@ -144,7 +144,7 @@ Game::GameResult Game::getResult() const {
     Game::GameResult gr;
 
     gr.poids = reseau.getPoids();
-    gr.score = (totMouvement + (snake.size() - 4) * 1000) * (perdu ? 0 : 1);
+    gr.score = (totMouvement + (snake.size() - 1) * 1000) * (perdu ? 0 : 1);
 
     return gr;
 }
@@ -276,11 +276,11 @@ void Game::next() {
     QList<float> entrees;
     QList<float> sorties = reseau.getSorties();
     QPoint tete = snake[0];
-    float max = -1;
     int incX, incY;
     int queueIncX, queueIncY;
     int incS = 0;
     int newDir;
+    int goodSortie = 0;
 
     getIncs(direction, incX, incY);
     getIncs(queueDirection, queueIncX, queueIncY);
@@ -311,12 +311,16 @@ void Game::next() {
     entrees.append(queueIncY);
 
     sorties = reseau.eval(entrees);
-
     for(int i=0;i<sorties.size();i++) {
-        if(sorties[i] > max && sorties[i] >= SEUIL) {
-            max = sorties[i];
-            incS = i == 0 ? 1 : -1;
+        if(sorties[i] >= SEUIL) {
+            goodSortie = i;
         }
+    }
+
+    if(goodSortie == 1) {
+        incS = -1;
+    } else if(goodSortie == 2) {
+        incS = 1;
     }
 
     newDir = (int)direction + incS;
@@ -336,9 +340,9 @@ void Game::next() {
 
 void Game::initReseau() {
     reseau.addCouche(Couche(28, 28));
-    reseau.addCouche(Couche(28, 56));
-    reseau.addCouche(Couche(56, 28));
-    reseau.addCouche(Couche(28, 2));
+    reseau.addCouche(Couche(28, 84));
+    reseau.addCouche(Couche(84, 28));
+    reseau.addCouche(Couche(28, 3));
 }
 
 void Game::getIncs(const Game::Direction& direction, int &incX, int &incY) const {

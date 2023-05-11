@@ -10,9 +10,11 @@ class Neurone {
 public:
     Neurone(int nbEntree);
     Neurone(const QList<float>& poids);
-    void eval(const QList<float>& entree);
+    void eval(const QList<float>& entree, float& sum);
     QList<float> getPoids() const;
     float getValue() const;
+    void active();
+    void reset();
 
     static float generePoid();
 private:

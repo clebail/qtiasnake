@@ -7,7 +7,7 @@ class Couche {
 public:
     Couche(int nbEntree, int nbSortie);
     Couche(QList<QList<float> > poids);
-    QList<float> eval(const QList<float>& entrees);
+    QList<float> eval(const QList<float>& entrees, bool last = false);
     QList<Neurone> getNeurones() const;
     int getNbEntree() const;
     int getNbSortie() const;

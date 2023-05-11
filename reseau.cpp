@@ -41,7 +41,7 @@ QList<float> Reseau::eval(const QList<float>& entrees) {
     this->entrees = entrees;
 
     for(int i=0;i<couches.size();i++) {
-        es = couches[i].eval(es);
+        es = couches[i].eval(es, i == couches.size() - 1);
     }
     
     return es;
