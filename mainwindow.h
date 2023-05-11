@@ -29,7 +29,8 @@ private:
     QTimer *timer;
     Reseau::Poids poids;
 
-    void newGame(const Reseau::Poids& poids = Reseau::Poids());
+
+    void newGame(const Reseau::Poids& poids = Reseau::Poids(), const QList<QPoint>& pasteques = QList<QPoint>());
     QList<Reseau::Poids> fusion() const;
 
 private slots:

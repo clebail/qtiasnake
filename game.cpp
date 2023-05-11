@@ -5,7 +5,7 @@
 #define NB_SORTIE           4
 #define PI                  ((float)(3.14159))
 
-Game::Game(int largeur, int hauteur, const Reseau::Poids &poids) {
+Game::Game(int largeur, int hauteur, const Reseau::Poids &poids, const QList<QPoint> &pasteques) {
     this->largeur = largeur;
     this->hauteur = hauteur;
 
@@ -18,8 +18,9 @@ Game::Game(int largeur, int hauteur, const Reseau::Poids &poids) {
     queueDirection = Game::edHaut;
 
     idPasteque = -1;
+    this->pasteques = pasteques;
 
-    newPasteque();
+    nextPasteque();
 
     calculSensors();
 
@@ -90,7 +91,7 @@ bool Game::step() {
         if(type == Sensor::estPasteque) {
             snake.append(last);
 
-            newPasteque();
+            nextPasteque();
             nbMouvement = 0;
 
             caseVisite.clear();
@@ -148,6 +149,10 @@ Game::GameResult Game::getResult() const {
 
 int Game::getNbCaseVisite() const {
     return caseVisite.size();
+}
+
+QList<QPoint> Game::getPasteques() const {
+    return pasteques;
 }
 
 Sensor::ESensorType Game::cellFree(const QPoint& p, const Sensor::ESensorType &toIgnore) const {
@@ -260,13 +265,22 @@ void Game::addSensorsForDirection(int incX, int incY) {
     }
 }
 
-void Game::newPasteque() {
+QPoint Game::newPasteque() const {
     QPoint p;
     do {
         p = QPoint(rand() % (largeur - 2) + 1, rand() % (hauteur - 2) + 1);
     }while (cellFree(p) != Sensor::estNone);
 
-    pasteque = p;
+    return p;
+}
+
+void Game::nextPasteque() {
+    if(++idPasteque < pasteques.size()) {
+        pasteque = pasteques.at(idPasteque);
+    } else {
+        pasteque = newPasteque();
+        pasteques.append(pasteque);
+    }
 }
 
 void Game::next() {

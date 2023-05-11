@@ -24,8 +24,8 @@ MainWindow::~MainWindow() {
     delete timer;
 }
 
-void MainWindow::newGame(const Reseau::Poids &poids) {
-    game = Game(17, 17, poids);
+void MainWindow::newGame(const Reseau::Poids &poids, const QList<QPoint>& pasteques) {
+    game = Game(17, 17, poids, pasteques);
     if(showGame) {
         gameWidget->setGame(game);
         reseauWidget->setReseau(game.getReseau());
@@ -250,6 +250,7 @@ void MainWindow::onTimer() {
     } else {
         if(idx < SIZE_GENERATION) {
             Game::GameResult gr = game.getResult();
+            pasteques = game.getPasteques();
 
             if(gr.score > bestScore) {
                 bestScore = gr.score;                
@@ -280,6 +281,6 @@ void MainWindow::onTimer() {
             lblBestScore->setText(QString().number(bestScoreGeneration)+QString(" / ")+QString().number(bestScore));
         }       
 
-        newGame(poids);
+        newGame(poids, pasteques);
     }
 }

@@ -21,7 +21,7 @@ public:
         bool operator()(Game::GameResult a, Game::GameResult b) const { return a.score > b.score; }
     } SortGameResult;
 
-    Game(int largeur = 12, int hauteur = 12, const Reseau::Poids& poids = Reseau::Poids());
+    Game(int largeur = 12, int hauteur = 12, const Reseau::Poids& poids = Reseau::Poids(), const QList<QPoint>& pasteques = QList<QPoint>());
     int getLargeur();
     int getHauteur();
     const QList<QPoint>& getSnake() const;
@@ -35,11 +35,13 @@ public:
     void setReseau(const Reseau& reseau);
     Game::GameResult getResult() const;
     int getNbCaseVisite() const;
+    QList<QPoint> getPasteques() const;
 private:
     int largeur;
     int hauteur;
     QList<QPoint> snake;
     QList<Sensor> sensors;
+    QList<QPoint> pasteques;
     QPoint pasteque;
     int nbMouvement;
     int totMouvement;
@@ -56,7 +58,8 @@ private:
     void calculSensors();
     Sensor getFirstCellOccupe(int incX, int incY, const Sensor::ESensorType& toIgnore = Sensor::estNone) const;
     void addSensorsForDirection(int incX, int incY);
-    void newPasteque();
+    QPoint newPasteque() const;
+    void nextPasteque();
     void next();
     void initReseau();
     void getIncs(const Direction &direction, int &incX, int &incY) const;
