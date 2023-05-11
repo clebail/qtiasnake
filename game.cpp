@@ -5,7 +5,7 @@
 #define NB_SORTIE           4
 #define PI                  ((float)(3.14159))
 
-Game::Game(int largeur, int hauteur, const Reseau::Poids &poids, const QList<QPoint> &pasteques) {
+Game::Game(int largeur, int hauteur, const Reseau::Poids &poids) {
     this->largeur = largeur;
     this->hauteur = hauteur;
 
@@ -16,9 +16,6 @@ Game::Game(int largeur, int hauteur, const Reseau::Poids &poids, const QList<QPo
 
     direction = Game::edHaut;
     queueDirection = Game::edHaut;
-
-    idPasteque = -1;
-    this->pasteques = pasteques;
 
     nextPasteque();
 
@@ -143,6 +140,7 @@ Game::GameResult Game::getResult() const {
 
     gr.poids = reseau.getPoids();
     gr.score = (totMouvement + (snake.size() - 1) * 1000) * (perdu ? 0 : 1);
+    gr.score = (snake.size() - 1) * 1000 * (perdu ? 0 : 1);
 
     return gr;
 }
@@ -275,12 +273,7 @@ QPoint Game::newPasteque() const {
 }
 
 void Game::nextPasteque() {
-    if(++idPasteque < pasteques.size()) {
-        pasteque = pasteques.at(idPasteque);
-    } else {
-        pasteque = newPasteque();
-        pasteques.append(pasteque);
-    }
+    pasteque = newPasteque();
 }
 
 void Game::next() {
@@ -352,6 +345,7 @@ void Game::next() {
 void Game::initReseau() {
     reseau.addCouche(Couche(28, 28));
     reseau.addCouche(Couche(28, 84));
+    reseau.addCouche(Couche(84, 84));
     reseau.addCouche(Couche(84, 28));
     reseau.addCouche(Couche(28, 3));
 }

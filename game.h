@@ -21,7 +21,7 @@ public:
         bool operator()(Game::GameResult a, Game::GameResult b) const { return a.score > b.score; }
     } SortGameResult;
 
-    Game(int largeur = 12, int hauteur = 12, const Reseau::Poids& poids = Reseau::Poids(), const QList<QPoint>& pasteques = QList<QPoint>());
+    Game(int largeur = 12, int hauteur = 12, const Reseau::Poids& poids = Reseau::Poids());
     int getLargeur();
     int getHauteur();
     const QList<QPoint>& getSnake() const;

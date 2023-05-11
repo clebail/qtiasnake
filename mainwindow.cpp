@@ -24,8 +24,8 @@ MainWindow::~MainWindow() {
     delete timer;
 }
 
-void MainWindow::newGame(const Reseau::Poids &poids, const QList<QPoint>& pasteques) {
-    game = Game(17, 17, poids, pasteques);
+void MainWindow::newGame(const Reseau::Poids &poids) {
+    game = Game(9, 9, poids);
     if(showGame) {
         gameWidget->setGame(game);
         reseauWidget->setReseau(game.getReseau());
@@ -73,12 +73,8 @@ QList<Reseau::Poids>  MainWindow::fusion() const {
                     }
                 }
 
-                if(rand() % 10 >= 5) {
-                    lprn1[rand() % lpn1.size()] = Neurone::generePoid();
-                }
-                if(rand() % 10 >= 5) {
-                    lprn2[rand() % lpn2.size()] = Neurone::generePoid();
-                }
+                lprn1[rand() % lpn1.size()] = Neurone::generePoid();
+                lprn2[rand() % lpn2.size()] = Neurone::generePoid();
 
                 lprc1.append(lprn1);
                 lprc2.append(lprn2);
@@ -250,7 +246,6 @@ void MainWindow::onTimer() {
     } else {
         if(idx < SIZE_GENERATION) {
             Game::GameResult gr = game.getResult();
-            pasteques = game.getPasteques();
 
             if(gr.score > bestScore) {
                 bestScore = gr.score;                
@@ -281,6 +276,6 @@ void MainWindow::onTimer() {
             lblBestScore->setText(QString().number(bestScoreGeneration)+QString(" / ")+QString().number(bestScore));
         }       
 
-        newGame(poids, pasteques);
+        newGame(poids);
     }
 }

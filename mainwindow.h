@@ -6,8 +6,8 @@
 #include "ui_mainwindow.h"
 
 #define SIZE_GENERATION     1000
-#define NB_ACCOUPLE         (SIZE_GENERATION / 10)
-#define ELITE               (NB_ACCOUPLE / 10)
+#define NB_ACCOUPLE         (SIZE_GENERATION / 5)
+#define ELITE               (2)
 
 class MainWindow : public QMainWindow, private Ui::MainWindow
 {
@@ -29,8 +29,7 @@ private:
     QTimer *timer;
     Reseau::Poids poids;
 
-
-    void newGame(const Reseau::Poids& poids = Reseau::Poids(), const QList<QPoint>& pasteques = QList<QPoint>());
+    void newGame(const Reseau::Poids& poids = Reseau::Poids());
     QList<Reseau::Poids> fusion() const;
 
 private slots:
