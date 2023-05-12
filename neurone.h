@@ -4,8 +4,8 @@
 #include <QList>
 #include <random>
 
-#define MAX_POIDS   ((float)1.0)
-#define SEUIL       ((float)0.5)
+#define MAX_POIDS   ((float)0.7)
+#define SEUIL       ((float)0.8)
 
 class Neurone {
 public:

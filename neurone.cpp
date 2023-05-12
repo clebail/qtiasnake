@@ -6,6 +6,8 @@ static std::default_random_engine generator;
 static std::normal_distribution<float> distribution(0.0, MAX_POIDS);
 
 Neurone::Neurone(int nbEntree) {
+    distribution.reset();
+
     this->nbEntree = nbEntree;
     for(int i=0;i<nbEntree;i++) {
         poids.append(Neurone::generePoid());
