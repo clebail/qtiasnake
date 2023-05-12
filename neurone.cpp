@@ -2,6 +2,9 @@
 #include <math.h>
 #include "neurone.h"
 
+static std::default_random_engine generator;
+static std::normal_distribution<float> distribution(0.0, MAX_POIDS);
+
 Neurone::Neurone(int nbEntree) {
     this->nbEntree = nbEntree;
     for(int i=0;i<nbEntree;i++) {
@@ -47,5 +50,5 @@ void Neurone::reset() {
 }
 
 float Neurone::generePoid() {
-    return ((rand() % 1000) - 500) * MAX_POIDS / 500.0;
+    return distribution(generator);
 }

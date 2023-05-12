@@ -25,7 +25,7 @@ MainWindow::~MainWindow() {
 }
 
 void MainWindow::newGame(const Reseau::Poids &poids) {
-    game = Game(9, 9, poids);
+    game = Game(12, 12, poids);
     if(showGame) {
         gameWidget->setGame(game);
         reseauWidget->setReseau(game.getReseau());

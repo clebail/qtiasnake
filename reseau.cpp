@@ -17,7 +17,6 @@ Reseau::Reseau(const Reseau::Poids &poids) {
     }
 }
 
-
 bool Reseau::addCouche(const Couche& couche) {
     if(couches.size()) {
         Couche last = couches.last();
@@ -66,6 +65,7 @@ Reseau::Poids Reseau::getPoids() const {
 
     return poids;
 }
+
 QList<float> Reseau::getEntress() const {
     return entrees;
 }

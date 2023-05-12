@@ -2,9 +2,10 @@
 #define NEURONE_H
 
 #include <QList>
+#include <random>
 
-#define MAX_POIDS   ((float)10)
-#define SEUIL       ((float)0.8)
+#define MAX_POIDS   ((float)1.0)
+#define SEUIL       ((float)0.5)
 
 class Neurone {
 public:

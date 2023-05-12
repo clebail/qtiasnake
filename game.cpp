@@ -344,10 +344,9 @@ void Game::next() {
 
 void Game::initReseau() {
     reseau.addCouche(Couche(28, 28));
-    reseau.addCouche(Couche(28, 84));
-    reseau.addCouche(Couche(84, 84));
-    reseau.addCouche(Couche(84, 28));
-    reseau.addCouche(Couche(28, 3));
+    reseau.addCouche(Couche(28, 14));
+    reseau.addCouche(Couche(14, 8));
+    reseau.addCouche(Couche(8, 3));
 }
 
 void Game::getIncs(const Game::Direction& direction, int &incX, int &incY) const {
