@@ -39,8 +39,6 @@ QList<float> Couche::eval(const QList<float>& entrees, bool last) {
     for(int i=0;i<neurones.size();i++) {
         if(last)
         {
-            qDebug() << neurones[i].getPoids() << entrees;
-
             if(i == active) {
                 neurones[i].active();
             } else {

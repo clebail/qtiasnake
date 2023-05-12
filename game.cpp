@@ -177,8 +177,8 @@ Sensor::ESensorType Game::cellFree(const QPoint& p, const Sensor::ESensorType &t
 void Game::calculSensors() {
    sensors.clear();
 
-    switch(direction) {
-    case Game::edHaut:
+    /*switch(direction) {
+    case Game::edHaut:*/
         addSensorsForDirection(-1, 0);
         addSensorsForDirection(-1, -1);
         addSensorsForDirection(0, -1);
@@ -187,7 +187,7 @@ void Game::calculSensors() {
         addSensorsForDirection(1, 1);
         addSensorsForDirection(0, 1);
         addSensorsForDirection(-1, 1);
-        break;
+    /*    break;
     case Game::edDroite:
         addSensorsForDirection(0, -1);
         addSensorsForDirection(1, -1);
@@ -218,7 +218,7 @@ void Game::calculSensors() {
         addSensorsForDirection(1, 0);
         addSensorsForDirection(1, 1);
         break;
-    }
+    }*/
 }
 
 Sensor Game::getFirstCellOccupe(int incX, int incY, const Sensor::ESensorType& toIgnore) const {
@@ -345,8 +345,8 @@ void Game::next() {
 void Game::initReseau() {
     reseau.addCouche(Couche(28, 28));
     reseau.addCouche(Couche(28, 14));
-    reseau.addCouche(Couche(14, 8));
-    reseau.addCouche(Couche(8, 3));
+    reseau.addCouche(Couche(14, 7));
+    reseau.addCouche(Couche(7, 3));
 }
 
 void Game::getIncs(const Game::Direction& direction, int &incX, int &incY) const {
