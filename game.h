@@ -14,7 +14,8 @@ public:
 
     typedef struct _GameResult {
         Reseau::Poids poids;
-        int score;       
+        int score;
+        bool perdu;
     } GameResult;
 
     typedef struct _SortGameResult {
@@ -35,20 +36,18 @@ public:
     void setReseau(const Reseau& reseau);
     Game::GameResult getResult() const;
     int getNbCaseVisite() const;
-    QList<QPoint> getPasteques() const;
+    int getNbNeurone() const;
 private:
     int largeur;
     int hauteur;
     QList<QPoint> snake;
     QList<Sensor> sensors;
-    QList<QPoint> pasteques;
     QPoint pasteque;
     int nbMouvement;
     int totMouvement;
     Reseau reseau;
     float diagonale;
     QList<int> caseVisite;
-    int idPasteque;
     bool perdu;
     Game::Direction direction;
     Game::Direction queueDirection;

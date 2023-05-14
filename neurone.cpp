@@ -1,19 +1,15 @@
 #include <QtDebug>
 #include <math.h>
 #include "neurone.h"
-
-static std::default_random_engine generator;
-static std::normal_distribution<float> distribution(0.0, MAX_POIDS);
+#include "random.h"
 
 Neurone::Neurone(int nbEntree) {
-    distribution.reset();
-
     this->nbEntree = nbEntree;
     for(int i=0;i<nbEntree;i++) {
-        poids.append(Neurone::generePoid());
+        poids.append(Random::generePoid());
     }
 
-    poids.append(Neurone::generePoid());
+    poids.append(Random::generePoid());
 }
 
 Neurone::Neurone(const QList<float>& poids) {
@@ -49,8 +45,4 @@ void Neurone::active() {
 
 void Neurone::reset() {
     value = 0.0;
-}
-
-float Neurone::generePoid() {
-    return distribution(generator);
 }

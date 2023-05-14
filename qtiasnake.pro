@@ -14,6 +14,7 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     neurone.cpp \
+    random.cpp \
     reseau.cpp \
     reseauwidget.cpp \
     sensor.cpp \
@@ -24,6 +25,7 @@ HEADERS += \
     game.h \
     mainwindow.h \
     neurone.h \
+    random.h \
     reseau.h \
     reseauwidget.h \
     sensor.h \

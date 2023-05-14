@@ -5,6 +5,7 @@
 #include <QFileDialog>
 #include <QtDebug>
 #include "mainwindow.h"
+#include "random.h"
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     setupUi(this);
@@ -25,7 +26,7 @@ MainWindow::~MainWindow() {
 }
 
 void MainWindow::newGame(const Reseau::Poids &poids) {
-    game = Game(12, 12, poids);
+    game = Game(22, 22, poids);
     if(showGame) {
         gameWidget->setGame(game);
         reseauWidget->setReseau(game.getReseau());
@@ -39,8 +40,11 @@ QList<Reseau::Poids>  MainWindow::fusion() const {
     int i1 = 0;
     int i2 = 1;
     int id = 0;
+    int nbNeurone = game.getNbNeurone();
 
-    for(int i=0;i<ELITE;i++) {
+    Random::reset();
+
+    for(int i=0;i<ELITE && i<generation.size();i++) {
         result.append(generation[i].poids);
     }
 
@@ -48,8 +52,10 @@ QList<Reseau::Poids>  MainWindow::fusion() const {
         Reseau::Poids p1 = generation[i1].poids;
         Reseau::Poids p2 = generation[i2].poids;
         Reseau::Poids pr1;
-        Reseau::Poids pr2;
+        Reseau::Poids pr2;            
 
+        int pivot = rand() % nbNeurone;
+        int idN = 0;
         for(int j=0;j<p1.size();j++) {
             QList<QList<float> > lpc1 = p1[j];
             QList<QList<float> > lpc2 = p2[j];
@@ -61,20 +67,30 @@ QList<Reseau::Poids>  MainWindow::fusion() const {
                 QList<float> lpn2 = lpc2[k];
                 QList<float> lprn1;
                 QList<float> lprn2;
-                int pivot = rand() % lpn1.size();
 
                 for(int l=0;l<lpn1.size();l++) {
-                    if(l <= pivot) {
+                    if(idN <= pivot) {
                         lprn1.append(lpn1[l]);
                         lprn2.append(lpn2[l]);
                     } else {
                         lprn1.append(lpn2[l]);
                         lprn2.append(lpn1[l]);
                     }
+
+                    idN++;
                 }
 
-                lprn1[rand() % lpn1.size()] = Neurone::generePoid();
-                lprn2[rand() % lpn2.size()] = Neurone::generePoid();
+                if(rand() % 10 >= 5) {
+                    for(int l=0;l<lprn1.size();l++) {
+                        lprn1[l] = Random::generePoid();
+                    }
+                }
+
+                if(rand() % 10 >= 5) {
+                    for(int l=0;l<lprn2.size();l++) {
+                        lprn2[l] = Random::generePoid();
+                    }
+                }
 
                 lprc1.append(lprn1);
                 lprc2.append(lprn2);
@@ -100,17 +116,28 @@ QList<Reseau::Poids>  MainWindow::fusion() const {
 }
 
 void MainWindow::on_pbStart_clicked() {
+    over = false;
     timer->start();
     pbStep->setEnabled(false);
+    pbStepOver->setEnabled(false);
 }
 
 void MainWindow::on_pbStop_clicked() {
+    over = false;
     timer->stop();
     pbStep->setEnabled(true);
+    pbStepOver->setEnabled(true);
 }
 
 void MainWindow::on_pbStep_clicked() {
     onTimer();
+}
+
+void MainWindow::on_pbStepOver_clicked() {
+    over = true;
+    timer->start();
+    pbStep->setEnabled(false);
+    pbStepOver->setEnabled(false);
 }
 
 void MainWindow::on_pbSetInterval_clicked() {
@@ -244,25 +271,33 @@ void MainWindow::onTimer() {
 
         lblMvt->setText(QString().number(game.getTotMouvement())+QString(" -- ")+QString().number(game.getNbMouvement())+QString(" / ")+QString().number(game.getMaxMouvement()));
     } else {
+        if(over) {
+            on_pbStop_clicked();
+        }
+
         if(idx < SIZE_GENERATION) {
             Game::GameResult gr = game.getResult();
 
-            if(gr.score > bestScore) {
-                bestScore = gr.score;                
+            if(!gr.perdu) {
+                if(gr.score > bestScore) {
+                    bestScore = gr.score;
+                }
+                if(gr.score > bestScoreGeneration) {
+                    bestScoreGeneration = gr.score;
+                }
+
+                lblBestScore->setText(QString().number(bestScoreGeneration)+QString(" / ")+QString().number(bestScore));
+
+                generation.append(gr);
             }
-            if(gr.score > bestScoreGeneration) {
-                bestScoreGeneration = gr.score;
-            }
 
-            lblBestScore->setText(QString().number(bestScoreGeneration)+QString(" / ")+QString().number(bestScore));
-
-            generation.append(gr);
-
+            poids = Reseau::Poids();
             idx++;
             if(idx < newGeneration.size()) {
                 poids = newGeneration[idx];
             }           
         } else {
+            qDebug() << "Survivants :" << generation.size();
             Game::SortGameResult sorter;
             std::sort(generation.begin(), generation.end(), sorter);
             newGeneration = fusion();

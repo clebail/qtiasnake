@@ -17,6 +17,7 @@ public:
     QList<float> getSorties() const;
     Reseau::Poids getPoids() const;
     QList<float> getEntress() const;
+    int getNbNeurone() const;
 private:
     QList<Couche> couches;
     QList<float> entrees;

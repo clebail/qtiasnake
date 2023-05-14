@@ -69,3 +69,13 @@ Reseau::Poids Reseau::getPoids() const {
 QList<float> Reseau::getEntress() const {
     return entrees;
 }
+
+int Reseau::getNbNeurone() const {
+    int result = 0;
+
+    for(int i=0;i<couches.size();i++) {
+        result += couches[i].getNbNeurone();
+    }
+
+    return result;
+}

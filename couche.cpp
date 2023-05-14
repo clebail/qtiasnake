@@ -1,10 +1,13 @@
 #include <QtDebug>
 #include "couche.h"
+#include "random.h"
 
 Couche::Couche(int nbEntree, int nbSortie) {
     this->nbEntree = nbEntree;
+
+    Random::reset();
     
-    for(int i=0;i<nbSortie;i++) {
+    for(int i=0;i<nbSortie;i++) {       
         neurones.append(Neurone(nbEntree));
     }
 }
@@ -29,7 +32,7 @@ QList<float> Couche::eval(const QList<float>& entrees, bool last) {
 
         neurones[i].eval(entrees, sumEntrees);
 
-        if(neurones[i].getValue() >= SEUIL && (first || sumEntrees > max)) {
+        if(/*neurones[i].getValue() >= SEUIL && */(first || sumEntrees > max)) {
             max = sumEntrees;
             active = i;
             first = false;
@@ -48,7 +51,7 @@ QList<float> Couche::eval(const QList<float>& entrees, bool last) {
 
         result.append(neurones[i].getValue());
     }
-    
+
     return result;
 }
 
@@ -82,4 +85,8 @@ QList<QList<float> > Couche::getPoids() const {
     }
 
     return poids;
+}
+
+int Couche::getNbNeurone() const {
+    return neurones.size();
 }
