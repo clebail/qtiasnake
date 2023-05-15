@@ -97,9 +97,9 @@ QList<Reseau::Poids> MainWindow::fusion() const {
         i2 = (i1 + 1 + id % NB_ACCOUPLE);
     }
 
-    // On mute l'elite
-    for(int i=0;i<ELITE && i<generation.size();i++) {
-        Reseau::Poids p = generation[i1].poids;
+    // On mute
+    for(int i=0;i<NB_MUTE && i<generation.size();i++) {
+        Reseau::Poids p = generation[i].poids;
         Reseau::Poids pr;
 
         for(int j=0;j<p.size();j++) {
@@ -111,7 +111,8 @@ QList<Reseau::Poids> MainWindow::fusion() const {
                 QList<float> lprn;
 
                 for(int l=0;l<lpn.size();l++) {
-                    lprn.append(lpn[l] + (rand() % 10 >= 5 ? MUTE_STEP : -MUTE_STEP));
+                    int m = rand() % 9;
+                    lprn.append(lpn[l] * (m >= 6 ? (1.0 + MUTE_STEP) : m >= 3 ? (1.0 - MUTE_STEP) : 1));
                 }
 
                 lprc.append(lprn);
