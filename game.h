@@ -52,6 +52,8 @@ private:
     Game::Direction direction;
     Game::Direction queueDirection;
     int maxMouvement;
+    int idPasteque;
+    int nbCgtDir;
 
     Sensor::ESensorType cellFree(const QPoint& p, const Sensor::ESensorType& toIgnore = Sensor::estNone) const;
     void calculSensors();

@@ -8,6 +8,7 @@
 class Random
 {
 public:
+    static int maxPoids;
     Random();
 
     static float generePoid();

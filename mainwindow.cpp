@@ -35,13 +35,14 @@ void MainWindow::newGame(const Reseau::Poids &poids) {
     lblGeneration->setText(QString().number(idxGeneration+1)+QString(" -- ")+QString().number(idx)+QString(" / ")+QString().number(SIZE_GENERATION));
 }
 
-QList<Reseau::Poids>  MainWindow::fusion() const {
+QList<Reseau::Poids> MainWindow::fusion() const {
     QList<Reseau::Poids> result;
     int i1 = 0;
     int i2 = 1;
     int id = 0;
     int nbNeurone = game.getNbNeurone();
 
+    Random::maxPoids += 10;
     Random::reset();
 
     for(int i=0;i<ELITE && i<generation.size();i++) {
@@ -56,6 +57,7 @@ QList<Reseau::Poids>  MainWindow::fusion() const {
 
         int pivot = rand() % nbNeurone;
         int idN = 0;
+        bool mute = false;
         for(int j=0;j<p1.size();j++) {
             QList<QList<float> > lpc1 = p1[j];
             QList<QList<float> > lpc2 = p2[j];
@@ -80,16 +82,18 @@ QList<Reseau::Poids>  MainWindow::fusion() const {
                     idN++;
                 }
 
-                if(rand() % 10 >= 5) {
+                if(!mute && rand() % 10 >= 5) {
                     for(int l=0;l<lprn1.size();l++) {
                         lprn1[l] = Random::generePoid();
                     }
+                    mute = true;
                 }
 
-                if(rand() % 10 >= 5) {
+                if(!mute && rand() % 10 >= 5) {
                     for(int l=0;l<lprn2.size();l++) {
                         lprn2[l] = Random::generePoid();
                     }
+                    mute = true;
                 }
 
                 lprc1.append(lprn1);
@@ -297,7 +301,7 @@ void MainWindow::onTimer() {
                 poids = newGeneration[idx];
             }           
         } else {
-            qDebug() << "Survivants :" << generation.size();
+            qDebug() << "Survivants :" << generation.size() << bestScoreGeneration << bestScore << QString("(") + QString().number(Random::maxPoids) + QString(")");
             Game::SortGameResult sorter;
             std::sort(generation.begin(), generation.end(), sorter);
             newGeneration = fusion();
