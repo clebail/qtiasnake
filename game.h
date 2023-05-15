@@ -2,6 +2,7 @@
 #define GAME_H
 
 #include <QList>
+#include <QMap>
 #include <QPoint>
 #include "sensor.h"
 #include "reseau.h"
@@ -47,7 +48,7 @@ private:
     int totMouvement;
     Reseau reseau;
     float diagonale;
-    QList<int> caseVisite;
+    QMap<int, int> caseVisite;
     bool perdu;
     Game::Direction direction;
     Game::Direction queueDirection;
