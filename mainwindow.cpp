@@ -42,76 +42,89 @@ QList<Reseau::Poids> MainWindow::fusion() const {
     int id = 0;
     int nbNeurone = game.getNbNeurone();
 
-    Random::maxPoids += 10;
-    Random::reset();
-
+    // On prend l'élite tel quel
     for(int i=0;i<ELITE && i<generation.size();i++) {
         result.append(generation[i].poids);
     }
 
-    while(result.size() < generation.size()) {
-        Reseau::Poids p1 = generation[i1].poids;
-        Reseau::Poids p2 = generation[i2].poids;
-        Reseau::Poids pr1;
-        Reseau::Poids pr2;            
+    // On accouple l'elite
+    for(id=1,i1=0,i2=1;i1<ELITE && i1<generation.size();id++) {
+        if(i2 < generation.size()) {
+            Reseau::Poids p1 = generation[i1].poids;
+            Reseau::Poids p2 = generation[i2].poids;
+            Reseau::Poids pr1;
+            Reseau::Poids pr2;
 
-        int pivot = rand() % nbNeurone;
-        int idN = 0;
-        bool mute = false;
-        for(int j=0;j<p1.size();j++) {
-            QList<QList<float> > lpc1 = p1[j];
-            QList<QList<float> > lpc2 = p2[j];
-            QList<QList<float> > lprc1;
-            QList<QList<float> > lprc2;
+            int pivot = rand() % nbNeurone;
+            int idN = 0;
+            for(int j=0;j<p1.size();j++) {
+                QList<QList<float> > lpc1 = p1[j];
+                QList<QList<float> > lpc2 = p2[j];
+                QList<QList<float> > lprc1;
+                QList<QList<float> > lprc2;
 
-            for(int k=0;k<lpc1.size();k++) {
-                QList<float> lpn1 = lpc1[k];
-                QList<float> lpn2 = lpc2[k];
-                QList<float> lprn1;
-                QList<float> lprn2;
+                for(int k=0;k<lpc1.size();k++) {
+                    QList<float> lpn1 = lpc1[k];
+                    QList<float> lpn2 = lpc2[k];
+                    QList<float> lprn1;
+                    QList<float> lprn2;
 
-                for(int l=0;l<lpn1.size();l++) {
-                    if(idN <= pivot) {
-                        lprn1.append(lpn1[l]);
-                        lprn2.append(lpn2[l]);
-                    } else {
-                        lprn1.append(lpn2[l]);
-                        lprn2.append(lpn1[l]);
+                    for(int l=0;l<lpn1.size();l++) {
+                        if(idN <= pivot) {
+                            lprn1.append(lpn1[l]);
+                            lprn2.append(lpn2[l]);
+                        } else {
+                            lprn1.append(lpn2[l]);
+                            lprn2.append(lpn1[l]);
+                        }
+
+                        idN++;
                     }
 
-                    idN++;
+                    lprc1.append(lprn1);
+                    lprc2.append(lprn2);
                 }
 
-                if(!mute && rand() % 10 >= 5) {
-                    for(int l=0;l<lprn1.size();l++) {
-                        lprn1[l] = Random::generePoid();
-                    }
-                    mute = true;
-                }
-
-                if(!mute && rand() % 10 >= 5) {
-                    for(int l=0;l<lprn2.size();l++) {
-                        lprn2[l] = Random::generePoid();
-                    }
-                    mute = true;
-                }
-
-                lprc1.append(lprn1);
-                lprc2.append(lprn2);
+                pr1.append(lprc1);
+                pr2.append(lprc2);
             }
 
-            pr1.append(lprc1);
-            pr2.append(lprc2);
+            result.append(pr1);
+            result.append(pr2);
         }
 
-        result.append(pr1);
-        result.append(pr2);
-
-        id++;
-        i1 = (id / NB_ACCOUPLE) % generation.size();
-        i2 = (i1 + 1 +id % NB_ACCOUPLE) % generation.size();
+        i1 = (id / NB_ACCOUPLE);
+        i2 = (i1 + 1 + id % NB_ACCOUPLE);
     }
 
+    // On mute l'elite
+    for(int i=0;i<ELITE && i<generation.size();i++) {
+        Reseau::Poids p = generation[i1].poids;
+        Reseau::Poids pr;
+
+        for(int j=0;j<p.size();j++) {
+            QList<QList<float> > lpc = p[j];
+            QList<QList<float> > lprc;
+
+            for(int k=0;k<lprc.size();k++) {
+                QList<float> lpn = lpc[k];
+                QList<float> lprn;
+
+                for(int l=0;l<lpn.size();l++) {
+                    lprn.append(lpn[l] + (rand() % 10 >= 5 ? MUTE_STEP : -MUTE_STEP));
+                }
+
+                lprc.append(lprn);
+            }
+
+            pr.append(lprc);
+        }
+
+
+        result.append(pr);
+    }
+
+    // On supprime le surplus
     for(int i=result.size()-1;i>=SIZE_GENERATION;i--) {
         result.removeAt(i);
     }

@@ -6,8 +6,8 @@
 #include "ui_mainwindow.h"
 
 #define SIZE_GENERATION     1000
-#define NB_ACCOUPLE         (SIZE_GENERATION / 10)
-#define ELITE               (NB_ACCOUPLE / 10)
+#define NB_ACCOUPLE         5
+#define ELITE               10
 
 class MainWindow : public QMainWindow, private Ui::MainWindow
 {
