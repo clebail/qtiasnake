@@ -30,9 +30,11 @@ private:
     QTimer *timer;
     Reseau::Poids poids;
     bool over = false;
+    QList<QString> allreadyPass;
 
     void newGame(const Reseau::Poids& poids = Reseau::Poids());
     QList<Reseau::Poids> fusion() const;
+    QString getHash(const Reseau::Poids& poids) const;
 
 private slots:
     void on_pbStart_clicked();

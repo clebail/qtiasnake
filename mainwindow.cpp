@@ -4,6 +4,7 @@
 #include <QJsonValue>
 #include <QFileDialog>
 #include <QtDebug>
+#include <QCryptographicHash>
 #include "mainwindow.h"
 #include "random.h"
 
@@ -41,6 +42,7 @@ QList<Reseau::Poids> MainWindow::fusion() const {
     int i2 = 1;
     int id = 0;
     int nbNeurone = game.getNbNeurone();
+    QString hash;
 
     // On prend l'élite tel quel
     for(int i=0;i<ELITE && i<generation.size();i++) {
@@ -89,8 +91,8 @@ QList<Reseau::Poids> MainWindow::fusion() const {
                 pr2.append(lprc2);
             }
 
-            result.append(pr1);
-            result.append(pr2);
+            if(!allreadyPass.contains(getHash(pr1))) result.append(pr1);
+            if(!allreadyPass.contains(getHash(pr2))) result.append(pr2);
         }
 
         i1 = (id / NB_ACCOUPLE);
@@ -106,7 +108,7 @@ QList<Reseau::Poids> MainWindow::fusion() const {
             QList<QList<float> > lpc = p[j];
             QList<QList<float> > lprc;
 
-            for(int k=0;k<lprc.size();k++) {
+            for(int k=0;k<lpc.size();k++) {
                 QList<float> lpn = lpc[k];
                 QList<float> lprn;
 
@@ -121,8 +123,7 @@ QList<Reseau::Poids> MainWindow::fusion() const {
             pr.append(lprc);
         }
 
-
-        result.append(pr);
+        if(!allreadyPass.contains(getHash(pr)))result.append(pr);
     }
 
     // On supprime le surplus
@@ -131,6 +132,27 @@ QList<Reseau::Poids> MainWindow::fusion() const {
     }
 
     return result;
+}
+
+QString  MainWindow::getHash(const Reseau::Poids& poids) const {
+    QString notHash = "";
+    QString s = "";
+
+    for(int j=0;j<poids.size();j++) {
+        QList<QList<float> > lpc = poids[j];
+
+        for(int k=0;k<lpc.size();k++) {
+            QList<float> lpn = lpc[k];
+
+            for(int l=0;l<lpn.size();l++) {
+                 QString value = QString("%1").arg(lpn[l], 0, 'f', 6);
+                 notHash += s+value;
+                 s = "-";
+            }
+        }
+    }
+
+    return QString(QCryptographicHash::hash(notHash.toLatin1(), QCryptographicHash::Md5).toHex());
 }
 
 void MainWindow::on_pbStart_clicked() {
@@ -306,6 +328,7 @@ void MainWindow::onTimer() {
 
                 lblBestScore->setText(QString().number(bestScoreGeneration)+QString(" / ")+QString().number(bestScore));
 
+                allreadyPass.append(getHash(gr.poids));
                 generation.append(gr);
             }
 
