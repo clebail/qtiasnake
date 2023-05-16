@@ -45,13 +45,18 @@ QList<Reseau::Poids> MainWindow::fusion() const {
     int id = 0;
     int nbNeurone = game.getNbNeurone();
     QString hash;
+    QList<QString> newGenHashs;
 
     // On prend l'élite tel quel
     for(int i=0;i<ELITE && i<generation.size();i++) {
         result.append(generation[i].poids);
+
+        newGenHashs.append(getHash(generation[i].poids));
     }
 
-    // On accouple l'elite
+    qDebug() << "Taille tmp 1" << result.size();
+
+    // On accouple l'elite avec double pivot à la couche
     for(id=1,i1=0,i2=1;i1<ELITE && i1<generation.size();id++) {
         if(i2 < generation.size()) {
             Reseau::Poids p1 = generation[i1].poids;
@@ -95,19 +100,87 @@ QList<Reseau::Poids> MainWindow::fusion() const {
                 pr2.append(lprc2);
             }
 
-            if(!allreadyPass.contains(getHash(pr1))) result.append(pr1);
-            if(!allreadyPass.contains(getHash(pr2))) result.append(pr2);
+            QString hPr1 = getHash(pr1);
+            QString hPr2 = getHash(pr2);
+            if(!allreadyPass.contains(hPr1) && !newGenHashs.contains(hPr1)) {
+                result.append(pr1);
+            }
+            newGenHashs.append(hPr1);
+            if(!allreadyPass.contains(hPr2) && !newGenHashs.contains(hPr2)) {
+                result.append(pr2);
+            }
+            newGenHashs.append(hPr2);
         }
 
         i1 = (id / NB_ACCOUPLE);
         i2 = (i1 + 1 + id % NB_ACCOUPLE);
     }
 
+    qDebug() << "Taille tmp 2" << result.size();
+
+    // On accouple l'elite avec simple pivot au neurone
+    for(id=1,i1=0,i2=1;i1<ELITE && i1<generation.size();id++) {
+        if(i2 < generation.size()) {
+            Reseau::Poids p1 = generation[i1].poids;
+            Reseau::Poids p2 = generation[i2].poids;
+            Reseau::Poids pr1;
+            Reseau::Poids pr2;
+
+            for(int j=0;j<p1.size();j++) {
+                QList<QList<float> > lpc1 = p1[j];
+                QList<QList<float> > lpc2 = p2[j];
+                QList<QList<float> > lprc1;
+                QList<QList<float> > lprc2;
+
+                for(int k=0;k<lpc1.size();k++) {
+                    QList<float> lpn1 = lpc1[k];
+                    QList<float> lpn2 = lpc2[k];
+                    QList<float> lprn1;
+                    QList<float> lprn2;
+                    int pivot = rand() % lpn1.size();
+
+                    for(int l=0;l<lpn1.size();l++) {
+                        if(l >= pivot) {
+                            lprn1.append(lpn1[l]);
+                            lprn2.append(lpn2[l]);
+                        } else {
+                            lprn1.append(lpn2[l]);
+                            lprn2.append(lpn1[l]);
+                        }
+                    }
+
+                    lprc1.append(lprn1);
+                    lprc2.append(lprn2);
+                }
+
+                pr1.append(lprc1);
+                pr2.append(lprc2);
+            }
+
+            QString hPr1 = getHash(pr1);
+            QString hPr2 = getHash(pr2);
+            if(!allreadyPass.contains(hPr1) && !newGenHashs.contains(hPr1)) {
+                result.append(pr1);
+            }
+            newGenHashs.append(hPr1);
+            if(!allreadyPass.contains(hPr2) && !newGenHashs.contains(hPr2)) {
+                result.append(pr2);
+            }
+            newGenHashs.append(hPr2);
+        }
+
+        i1 = (id / NB_ACCOUPLE);
+        i2 = (i1 + 1 + id % NB_ACCOUPLE);
+    }
+
+    qDebug() << "Taille tmp 3" << result.size();
+
     // On mute en changeant les poids
     for(int i=0;i<NB_MUTE && i<generation.size();i++) {
         Reseau::Poids p = generation[i].poids;
         Reseau::Poids pr;
         int nbTest = 0;
+        QString hpr;
 
         do {
             pr.clear();
@@ -130,16 +203,22 @@ QList<Reseau::Poids> MainWindow::fusion() const {
 
                 pr.append(lprc);
             }
-        }while(allreadyPass.contains(getHash(pr)) && nbTest < MAX_TEST);
+
+            hpr = getHash(pr);
+        } while((allreadyPass.contains(hpr) || newGenHashs.contains(hpr)) && ++nbTest < MAX_TEST);
 
         result.append(pr);
+        newGenHashs.append(hpr);
     }
 
-    // On mute en changeant affectant de nouveau poids
+    qDebug() << "Taille tmp 4" << result.size();
+
+    // On mute en affectant de nouveau poids
     for(int i=0;i<NB_MUTE && i<generation.size();i++) {
         Reseau::Poids p = generation[i].poids;
         Reseau::Poids pr;
         int nbTest = 0;
+        QString hpr;
 
         do {
             pr.clear();
@@ -165,14 +244,16 @@ QList<Reseau::Poids> MainWindow::fusion() const {
 
                 pr.append(lprc);
             }
-        }while(allreadyPass.contains(getHash(pr)) && nbTest < MAX_TEST);
+            hpr = getHash(pr);
+        }while((allreadyPass.contains(hpr) || newGenHashs.contains(hpr)) && ++nbTest < MAX_TEST);
 
         result.append(pr);
+        newGenHashs.append(hpr);
     }
 
     // On supprime le surplus
-    for(int i=result.size()-1;i>=SIZE_GENERATION;i--) {
-        result.removeAt(i);
+    while(result.size() > SIZE_GENERATION) {
+        result.removeLast();
     }
 
     qDebug() << "Nouvelle génération, création de" << result.size() << "individus";
@@ -374,9 +455,10 @@ void MainWindow::onTimer() {
 
                 lblBestScore->setText(QString().number(bestScoreGeneration)+QString(" / ")+QString().number(bestScore));
 
-                allreadyPass.append(getHash(gr.poids));
                 generation.append(gr);
             }
+
+            allreadyPass.append(getHash(gr.poids));
 
             poids = Reseau::Poids();
             idx++;

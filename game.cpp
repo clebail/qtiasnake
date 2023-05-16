@@ -305,12 +305,12 @@ QPoint Game::newPasteque() const {
 }
 
 void Game::nextPasteque() {
-    if(++idPasteque < pasteques.size()) {
+    /*if(++idPasteque < pasteques.size()) {
         pasteque = pasteques[idPasteque];
-    } else {
+    } else {*/
         pasteque = newPasteque();
-        pasteques.append(pasteque);
-    }
+        //pasteques.append(pasteque);
+    //}
 }
 
 void Game::next() {
