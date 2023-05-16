@@ -6,9 +6,9 @@
 #include "ui_mainwindow.h"
 
 #define SIZE_GENERATION     1000
-#define NB_ACCOUPLE         10
 #define ELITE               10
-#define NB_MUTE             20
+#define NB_ACCOUPLE         20
+#define NB_MUTE             30
 
 class MainWindow : public QMainWindow, private Ui::MainWindow
 {

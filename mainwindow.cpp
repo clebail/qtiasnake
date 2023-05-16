@@ -8,6 +8,8 @@
 #include "mainwindow.h"
 #include "random.h"
 
+#define MAX_TEST                100
+
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     setupUi(this);
 
@@ -57,7 +59,9 @@ QList<Reseau::Poids> MainWindow::fusion() const {
             Reseau::Poids pr1;
             Reseau::Poids pr2;
 
-            int pivot = rand() % nbNeurone;
+            int pivot1 = rand() % nbNeurone;
+            int pivot2 = pivot1 + (rand() % (nbNeurone - pivot1));
+
             int idN = 0;
             for(int j=0;j<p1.size();j++) {
                 QList<QList<float> > lpc1 = p1[j];
@@ -72,7 +76,7 @@ QList<Reseau::Poids> MainWindow::fusion() const {
                     QList<float> lprn2;
 
                     for(int l=0;l<lpn1.size();l++) {
-                        if(idN <= pivot) {
+                        if(idN <= pivot1 || idN > pivot2) {
                             lprn1.append(lpn1[l]);
                             lprn2.append(lpn2[l]);
                         } else {
@@ -99,37 +103,79 @@ QList<Reseau::Poids> MainWindow::fusion() const {
         i2 = (i1 + 1 + id % NB_ACCOUPLE);
     }
 
-    // On mute
+    // On mute en changeant les poids
     for(int i=0;i<NB_MUTE && i<generation.size();i++) {
         Reseau::Poids p = generation[i].poids;
         Reseau::Poids pr;
+        int nbTest = 0;
 
-        for(int j=0;j<p.size();j++) {
-            QList<QList<float> > lpc = p[j];
-            QList<QList<float> > lprc;
+        do {
+            pr.clear();
 
-            for(int k=0;k<lpc.size();k++) {
-                QList<float> lpn = lpc[k];
-                QList<float> lprn;
+            for(int j=0;j<p.size();j++) {
+                QList<QList<float> > lpc = p[j];
+                QList<QList<float> > lprc;
 
-                for(int l=0;l<lpn.size();l++) {
-                    int m = rand() % 9;
-                    lprn.append(lpn[l] * (m >= 6 ? (1.0 + MUTE_STEP) : m >= 3 ? (1.0 - MUTE_STEP) : 1));
+                for(int k=0;k<lpc.size();k++) {
+                    QList<float> lpn = lpc[k];
+                    QList<float> lprn;
+
+                    for(int l=0;l<lpn.size();l++) {
+                        int m = rand() % 9;
+                        lprn.append(lpn[l] * (m >= 6 ? (1.0 + MUTE_STEP) : m >= 3 ? (1.0 - MUTE_STEP) : 1));
+                    }
+
+                    lprc.append(lprn);
                 }
 
-                lprc.append(lprn);
+                pr.append(lprc);
             }
+        }while(allreadyPass.contains(getHash(pr)) && nbTest < MAX_TEST);
 
-            pr.append(lprc);
-        }
+        result.append(pr);
+    }
 
-        if(!allreadyPass.contains(getHash(pr)))result.append(pr);
+    // On mute en changeant affectant de nouveau poids
+    for(int i=0;i<NB_MUTE && i<generation.size();i++) {
+        Reseau::Poids p = generation[i].poids;
+        Reseau::Poids pr;
+        int nbTest = 0;
+
+        do {
+            pr.clear();
+
+            for(int j=0;j<p.size();j++) {
+                QList<QList<float> > lpc = p[j];
+                QList<QList<float> > lprc;
+
+                for(int k=0;k<lpc.size();k++) {
+                    QList<float> lpn = lpc[k];
+                    QList<float> lprn;
+
+                    for(int l=0;l<lpn.size();l++) {
+                        float p = lpn[l];
+                        if(rand() % 10 >= 8) {
+                            p = Random::generePoid();
+                        }
+                        lprn.append(p);
+                    }
+
+                    lprc.append(lprn);
+                }
+
+                pr.append(lprc);
+            }
+        }while(allreadyPass.contains(getHash(pr)) && nbTest < MAX_TEST);
+
+        result.append(pr);
     }
 
     // On supprime le surplus
     for(int i=result.size()-1;i>=SIZE_GENERATION;i--) {
         result.removeAt(i);
     }
+
+    qDebug() << "Nouvelle génération, création de" << result.size() << "individus";
 
     return result;
 }
@@ -145,7 +191,7 @@ QString  MainWindow::getHash(const Reseau::Poids& poids) const {
             QList<float> lpn = lpc[k];
 
             for(int l=0;l<lpn.size();l++) {
-                 QString value = QString("%1").arg(lpn[l], 0, 'f', 6);
+                 QString value = QString("%1").arg(lpn[l], 0, 'f', 2);
                  notHash += s+value;
                  s = "-";
             }
@@ -338,7 +384,7 @@ void MainWindow::onTimer() {
                 poids = newGeneration[idx];
             }           
         } else {
-            qDebug() << "Survivants :" << generation.size() << bestScoreGeneration << bestScore << QString("(") + QString().number(Random::maxPoids) + QString(")");
+            qDebug() << "Survivants :" << generation.size() << bestScoreGeneration << bestScore;
             Game::SortGameResult sorter;
             std::sort(generation.begin(), generation.end(), sorter);
             newGeneration = fusion();
