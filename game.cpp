@@ -108,8 +108,6 @@ bool Game::step() {
 
             nextPasteque();
             nbMouvement = 0;
-
-            caseVisite.clear();
         }
 
         if(!caseVisite.contains(idCase)) {
@@ -171,7 +169,7 @@ Game::GameResult Game::getResult() const {
     gr.poids = reseau.getPoids();
     gr.score = (totMouvement * 10 / (nbCgtDir ?: 1)+ (snake.size() - 4) * 10000) * (perdu ? 0 : 1);
     //gr.score = ((snake.size() - 4) * 1000) * (perdu ? 0 : 1);
-    gr.score = ((caseVisite.size() / m * totMouvement)+ (snake.size() - 4) * 10000) * (perdu ? 0 : 1);
+    gr.score = ((caseVisite.size() / m) + (snake.size() - 4) * 10000) * (perdu ? 0 : 1);
 
 
     gr.perdu = perdu;
@@ -339,12 +337,12 @@ void Game::next() {
                 if(diffY == 0) {
                     entrees.append(0);
                 } else {
-                    entrees.append((hauteur - 1) / (float)diffY);
+                    entrees.append((float)diffY / (hauteur - 1));
                 }
             } else if(diffY == 0) {
-                entrees.append((largeur - 1) / (float)diffX);
+                entrees.append((float)diffX / (largeur - 1));
             } else {
-                entrees.append(diagonale / sqrt((float)(diffX * diffX + diffY * diffY)));
+                entrees.append(sqrt((float)(diffX * diffX + diffY * diffY)) / diagonale);
             }
         } else {
             entrees.append(0);
