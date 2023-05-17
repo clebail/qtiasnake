@@ -195,7 +195,7 @@ QList<Reseau::Poids> MainWindow::fusion() const {
 
                     for(int l=0;l<lpn.size();l++) {
                         int m = rand() % 9;
-                        lprn.append(lpn[l] * (m >= 6 ? (1.0 + MUTE_STEP) : m >= 3 ? (1.0 - MUTE_STEP) : 1));
+                        lprn.append(lpn[l] + (m >= 6 ? MUTE_STEP : m >= 3 ? - MUTE_STEP : 0));
                     }
 
                     lprc.append(lprn);
