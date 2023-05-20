@@ -468,7 +468,19 @@ void MainWindow::onTimer() {
         } else {
             qDebug() << "Survivants :" << generation.size() << bestScoreGeneration << bestScore;
             Game::SortGameResult sorter;
+
+            for(int i=0;i<ELITE && i < generation.size();i++) {
+                qDebug() << generation[i].score << getHash(generation[i].poids);
+            }
+            qDebug() << "--";
+
             std::sort(generation.begin(), generation.end(), sorter);
+
+            for(int i=0;i<ELITE && i < generation.size();i++) {
+                qDebug() << generation[i].score << getHash(generation[i].poids);;
+            }
+            qDebug() << "--";
+
             newGeneration = fusion();
 
             QMap<QString, int>::iterator i;
@@ -486,6 +498,10 @@ void MainWindow::onTimer() {
             bestScoreGeneration = 0;
 
             lblBestScore->setText(QString().number(bestScoreGeneration)+QString(" / ")+QString().number(bestScore));
+
+            if(cbStopGen->checkState() == Qt::CheckState::Checked) {
+                on_pbStop_clicked();
+            }
         }       
 
         newGame(poids);
