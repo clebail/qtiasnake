@@ -102,11 +102,11 @@ QList<Reseau::Poids> MainWindow::fusion() const {
 
             QString hPr1 = getHash(pr1);
             QString hPr2 = getHash(pr2);
-            if(!allreadyPass.contains(hPr1) && !newGenHashs.contains(hPr1)) {
+            if(!tabou.contains(hPr1) && !newGenHashs.contains(hPr1)) {
                 result.append(pr1);
             }
             newGenHashs.append(hPr1);
-            if(!allreadyPass.contains(hPr2) && !newGenHashs.contains(hPr2)) {
+            if(!tabou.contains(hPr2) && !newGenHashs.contains(hPr2)) {
                 result.append(pr2);
             }
             newGenHashs.append(hPr2);
@@ -159,11 +159,11 @@ QList<Reseau::Poids> MainWindow::fusion() const {
 
             QString hPr1 = getHash(pr1);
             QString hPr2 = getHash(pr2);
-            if(!allreadyPass.contains(hPr1) && !newGenHashs.contains(hPr1)) {
+            if(!tabou.contains(hPr1) && !newGenHashs.contains(hPr1)) {
                 result.append(pr1);
             }
             newGenHashs.append(hPr1);
-            if(!allreadyPass.contains(hPr2) && !newGenHashs.contains(hPr2)) {
+            if(!tabou.contains(hPr2) && !newGenHashs.contains(hPr2)) {
                 result.append(pr2);
             }
             newGenHashs.append(hPr2);
@@ -205,7 +205,7 @@ QList<Reseau::Poids> MainWindow::fusion() const {
             }
 
             hpr = getHash(pr);
-        } while((allreadyPass.contains(hpr) || newGenHashs.contains(hpr)) && ++nbTest < MAX_TEST);
+        } while((tabou.contains(hpr) || newGenHashs.contains(hpr)) && ++nbTest < MAX_TEST);
 
         result.append(pr);
         newGenHashs.append(hpr);
@@ -245,7 +245,7 @@ QList<Reseau::Poids> MainWindow::fusion() const {
                 pr.append(lprc);
             }
             hpr = getHash(pr);
-        }while((allreadyPass.contains(hpr) || newGenHashs.contains(hpr)) && ++nbTest < MAX_TEST);
+        }while((tabou.contains(hpr) || newGenHashs.contains(hpr)) && ++nbTest < MAX_TEST);
 
         result.append(pr);
         newGenHashs.append(hpr);
@@ -458,7 +458,7 @@ void MainWindow::onTimer() {
                 generation.append(gr);
             }
 
-            allreadyPass.append(getHash(gr.poids));
+            tabou.insert(getHash(gr.poids), TABOU_TIME);
 
             poids = Reseau::Poids();
             idx++;
@@ -470,6 +470,14 @@ void MainWindow::onTimer() {
             Game::SortGameResult sorter;
             std::sort(generation.begin(), generation.end(), sorter);
             newGeneration = fusion();
+
+            QMap<QString, int>::iterator i;
+            for(i=tabou.begin();i!=tabou.end();++i) {
+                i.value()--;
+                if(!i.value()) {
+                    tabou.remove(i.key());
+                }
+            }
 
             generation.clear();
             idx = 0;

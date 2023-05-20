@@ -6,9 +6,10 @@
 #include "ui_mainwindow.h"
 
 #define SIZE_GENERATION     1000
-#define ELITE               10
-#define NB_ACCOUPLE         20
+#define ELITE               5
+#define NB_ACCOUPLE         100
 #define NB_MUTE             30
+#define TABOU_TIME          20
 
 class MainWindow : public QMainWindow, private Ui::MainWindow
 {
@@ -30,7 +31,7 @@ private:
     QTimer *timer;
     Reseau::Poids poids;
     bool over = false;
-    QList<QString> allreadyPass;
+    QMap<QString, int> tabou;
 
     void newGame(const Reseau::Poids& poids = Reseau::Poids());
     QList<Reseau::Poids> fusion() const;
