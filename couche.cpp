@@ -2,22 +2,22 @@
 #include "couche.h"
 #include "random.h"
 
-Couche::Couche(int nbEntree, int nbSortie) {
+Couche::Couche(int nbEntree, int nbSortie, const Neurone::Function& function) {
     this->nbEntree = nbEntree;
 
     Random::reset();
     
     for(int i=0;i<nbSortie;i++) {       
-        neurones.append(Neurone(nbEntree));
+        neurones.append(Neurone(nbEntree, function));
     }
 }
 
-Couche::Couche(QList<QList<float> > poids) {
+Couche::Couche(QList<QList<float> > poids, const Neurone::Function& function) {
     QList<QList<float> >::iterator i;
     
     for(i=poids.begin();i!=poids.end();++i) {
         nbEntree = (*i).size();
-        neurones.append(Neurone(*i));
+        neurones.append(Neurone(*i, function));
     }
 }
 

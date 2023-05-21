@@ -55,6 +55,8 @@ private:
     int maxMouvement;
     int idPasteque;
     int nbCgtDir;
+    bool turnRight, turnLeft;
+    int turns[2];
 
     Sensor::ESensorType cellFree(const QPoint& p, const Sensor::ESensorType& toIgnore = Sensor::estNone) const;
     void calculSensors();

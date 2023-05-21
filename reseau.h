@@ -10,7 +10,7 @@ public:
     Reseau();
     Reseau(const Couche& couche);
     Reseau(const QList<Couche>& couches);
-    Reseau(const Reseau::Poids &poids);
+    Reseau(const Reseau::Poids &poids, const QList<Neurone::Function>& functions);
     bool addCouche(const Couche& couche);
     QList<float> eval(const QList<float>& entrees);
     QList<Couche> getCouches() const;

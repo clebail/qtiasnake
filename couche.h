@@ -5,8 +5,8 @@
 
 class Couche {
 public:
-    Couche(int nbEntree, int nbSortie);
-    Couche(QList<QList<float> > poids);
+    Couche(int nbEntree, int nbSortie, const Neurone::Function& function = Neurone::efSigmoide);
+    Couche(QList<QList<float> > poids, const Neurone::Function& function = Neurone::efSigmoide);
     QList<float> eval(const QList<float>& entrees, bool last = false);
     QList<Neurone> getNeurones() const;
     int getNbEntree() const;

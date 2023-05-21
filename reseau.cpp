@@ -1,3 +1,4 @@
+#include <QtDebug>
 #include "reseau.h"
 
 Reseau::Reseau() {
@@ -11,9 +12,9 @@ Reseau::Reseau(const QList<Couche>& couches) {
     this->couches = couches;
 }
 
-Reseau::Reseau(const Reseau::Poids &poids) {
+Reseau::Reseau(const Reseau::Poids &poids, const QList<Neurone::Function> &functions) {
     for(int i=0;i<poids.size();i++) {
-        couches.append(Couche(poids[i]));
+        couches.append(Couche(poids[i], functions[i]));
     }
 }
 

@@ -480,17 +480,22 @@ void MainWindow::onTimer() {
             newGeneration = fusion();
 
             QMap<QString, int>::iterator i;
+            QList<QString> toRemove;
             for(i=tabou.begin();i!=tabou.end();++i) {
                 i.value()--;
                 if(!i.value()) {
-                    tabou.remove(i.key());
+                    toRemove.append(i.key());
                 }
+            }
+
+            foreach(auto k, toRemove) {
+                tabou.remove(k);
             }
 
             generation.clear();
             idx = 0;
             idxGeneration++;
-            poids = newGeneration[idx];
+            if(newGeneration.size()) poids = newGeneration[idx];
             bestScoreGeneration = 0;
 
             lblBestScore->setText(QString().number(bestScoreGeneration)+QString(" / ")+QString().number(bestScore));

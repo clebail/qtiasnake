@@ -6,6 +6,7 @@
 #define PI                  ((float)(3.14159))
 
 static QList<QPoint> pasteques;
+static QList<Neurone::Function> functions;
 
 QDebug operator<<(QDebug debug, const Sensor &sensor)
 {
@@ -42,13 +43,14 @@ Game::Game(int largeur, int hauteur, const Reseau::Poids &poids) {
     if(poids.size() == 0) {
         initReseau();
     } else {
-        reseau = Reseau(poids);
+        reseau = Reseau(poids, functions);
     }
 
     caseVisite.clear();
     caseVisite.insert(snake[0].x() + snake[0].y() * largeur, 1);
 
-    perdu = false;
+    perdu = turnRight = turnLeft = false;
+    turns[0] = turns[1] = 0;
 }
 
 int Game::getLargeur() {
@@ -120,6 +122,7 @@ bool Game::step() {
         if(nbMouvement == maxMouvement) {
 
             perdu = snake.size() == 4 && caseVisite.size() < 50;
+            perdu |= (!turnLeft || !turnRight);
 
             return false;
         }
@@ -159,6 +162,9 @@ void Game::setReseau(const Reseau& reseau) {
 Game::GameResult Game::getResult() const {
     Game::GameResult gr;
     float m = 0;
+    float t = (turns[0] + turns[1]) / 2.0;
+
+    t = 20000 * t / qMax(turns[0], turns[1]);
 
     foreach(auto i, caseVisite.values()) {
         m += i;
@@ -169,7 +175,7 @@ Game::GameResult Game::getResult() const {
     gr.poids = reseau.getPoids();
     gr.score = (totMouvement * 10 / (nbCgtDir ?: 1)+ (snake.size() - 4) * 10000) * (perdu ? 0 : 1);
     //gr.score = ((snake.size() - 4) * 1000) * (perdu ? 0 : 1);
-    gr.score = ((caseVisite.size() / m) + (snake.size() - 4) * 10000) * (perdu ? 0 : 1);
+    gr.score = (qMax(caseVisite.size() / m, 1.0F) + (int)t + (snake.size() - 4) * 100000) * (perdu ? 0 : 1);
 
 
     gr.perdu = perdu;
@@ -365,9 +371,13 @@ void Game::next() {
     if(goodSortie == 1) {
         incS = -1;
         nbCgtDir++;
+        turnLeft = true;
+        turns[0]++;
     } else if(goodSortie == 2) {
         incS = 1;
         nbCgtDir++;
+        turnRight = true;
+        turns[1]++;
     }
 
     newDir = (int)direction + incS;
@@ -386,10 +396,17 @@ void Game::next() {
 }
 
 void Game::initReseau() {
-    reseau.addCouche(Couche(24, 24));
-    reseau.addCouche(Couche(24, 12));
-    reseau.addCouche(Couche(12, 8));
-    reseau.addCouche(Couche(8, 3));
+    functions.clear();
+
+    functions.append(Neurone::efSigmoide);
+    functions.append(Neurone::efSigmoide);
+    functions.append(Neurone::efSigmoide);
+    functions.append(Neurone::efRelu);
+
+    reseau.addCouche(Couche(24, 24, functions[0]));
+    reseau.addCouche(Couche(24, 12, functions[1]));
+    reseau.addCouche(Couche(12, 8, functions[2]));
+    reseau.addCouche(Couche(8, 3, functions[3]));
 }
 
 void Game::getIncs(const Game::Direction& direction, int &incX, int &incY) const {
