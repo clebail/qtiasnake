@@ -29,13 +29,14 @@ MainWindow::~MainWindow() {
 }
 
 void MainWindow::newGame(const Reseau::Poids &poids) {
+    int sGeneration = qMax(SIZE_GENERATION, newGeneration.size());
     game = Game(22, 22, poids);
     if(showGame) {
         gameWidget->setGame(game);
         reseauWidget->setReseau(game.getReseau());
     }
 
-    lblGeneration->setText(QString().number(idxGeneration+1)+QString(" -- ")+QString().number(idx)+QString(" / ")+QString().number(SIZE_GENERATION));
+    lblGeneration->setText(QString().number(idxGeneration+1)+QString(" -- ")+QString().number(idx)+QString(" / ")+QString().number(sGeneration));
 }
 
 QList<Reseau::Poids> MainWindow::fusion() const {
@@ -233,7 +234,7 @@ QList<Reseau::Poids> MainWindow::fusion() const {
 
                     for(int l=0;l<lpn.size();l++) {
                         float p = lpn[l];
-                        if(rand() % 10 >= 8) {
+                        if(rand() % 5 >= 8) {
                             p = Random::generePoid();
                         }
                         lprn.append(p);
@@ -249,11 +250,6 @@ QList<Reseau::Poids> MainWindow::fusion() const {
 
         result.append(pr);
         newGenHashs.append(hpr);
-    }
-
-    // On supprime le surplus
-    while(result.size() > SIZE_GENERATION) {
-        result.removeLast();
     }
 
     qDebug() << "Nouvelle génération, création de" << result.size() << "individus";
@@ -442,7 +438,7 @@ void MainWindow::onTimer() {
             on_pbStop_clicked();
         }
 
-        if(idx < SIZE_GENERATION) {
+        if(idx < qMax(SIZE_GENERATION, newGeneration.size())) {
             Game::GameResult gr = game.getResult();
 
             if(!gr.perdu) {
