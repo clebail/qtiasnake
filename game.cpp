@@ -343,12 +343,12 @@ void Game::next() {
                 if(diffY == 0) {
                     entrees.append(0);
                 } else {
-                    entrees.append((float)diffY / (hauteur - 1));
+                    entrees.append(1.0 - (float)diffY / (hauteur - 1));
                 }
             } else if(diffY == 0) {
-                entrees.append((float)diffX / (largeur - 1));
+                entrees.append(1.0 - (float)diffX / (largeur - 1));
             } else {
-                entrees.append(sqrt((float)(diffX * diffX + diffY * diffY)) / diagonale);
+                entrees.append(1.0 - sqrt((float)(diffX * diffX + diffY * diffY)) / diagonale);
             }
         } else {
             entrees.append(0);
