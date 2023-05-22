@@ -18,7 +18,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     timer->setInterval(10);
     gameWidget->showSensors(false);
 
-    idx = bestScore = idxGeneration = bestScoreGeneration = 0;
+    idx = bestScoreVisite = idxGeneration = bestScoreVisiteGeneration = bestScorePasteque = bestScorePastequeGeneration = 0;
     showGame = true;
 
     newGame();
@@ -39,7 +39,7 @@ void MainWindow::newGame(const Reseau::Poids &poids) {
     lblGeneration->setText(QString().number(idxGeneration+1)+QString(" -- ")+QString().number(idx)+QString(" / ")+QString().number(sGeneration));
 }
 
-QList<Reseau::Poids> MainWindow::fusion() const {
+QList<Reseau::Poids> MainWindow::fusion(bool gardeElite) const {
     QList<Reseau::Poids> result;
     int i1 = 0;
     int i2 = 1;
@@ -49,13 +49,15 @@ QList<Reseau::Poids> MainWindow::fusion() const {
     QList<QString> newGenHashs;
 
     // On prend l'élite tel quel
-    for(int i=0;i<ELITE && i<generation.size();i++) {
-        result.append(generation[i].poids);
+    if(gardeElite) {
+        for(int i=0;i<ELITE && i<generation.size();i++) {
+            result.append(generation[i].poids);
 
-        newGenHashs.append(getHash(generation[i].poids));
+            newGenHashs.append(getHash(generation[i].poids));
+        }
+
+        qDebug() << "Taille elite" << result.size();
     }
-
-    qDebug() << "Taille tmp 1" << result.size();
 
     // On accouple l'elite avec double pivot à la couche
     for(id=1,i1=0,i2=1;i1<ELITE && i1<generation.size();id++) {
@@ -117,7 +119,7 @@ QList<Reseau::Poids> MainWindow::fusion() const {
         i2 = (i1 + 1 + id % NB_ACCOUPLE);
     }
 
-    qDebug() << "Taille tmp 2" << result.size();
+    qDebug() << "Taille après accouplement 1" << result.size();
 
     // On accouple l'elite avec simple pivot au neurone
     for(id=1,i1=0,i2=1;i1<ELITE && i1<generation.size();id++) {
@@ -174,7 +176,7 @@ QList<Reseau::Poids> MainWindow::fusion() const {
         i2 = (i1 + 1 + id % NB_ACCOUPLE);
     }
 
-    qDebug() << "Taille tmp 3" << result.size();
+    qDebug() << "Taille après accouplement 2" << result.size();
 
     // On mute en changeant les poids
     for(int i=0;i<NB_MUTE && i<generation.size();i++) {
@@ -212,7 +214,7 @@ QList<Reseau::Poids> MainWindow::fusion() const {
         newGenHashs.append(hpr);
     }
 
-    qDebug() << "Taille tmp 4" << result.size();
+    qDebug() << "Taille après mutaion 1" << result.size();
 
     // On mute en affectant de nouveau poids
     for(int i=0;i<NB_MUTE && i<generation.size();i++) {
@@ -252,7 +254,7 @@ QList<Reseau::Poids> MainWindow::fusion() const {
         newGenHashs.append(hpr);
     }
 
-    qDebug() << "Nouvelle génération, création de" << result.size() << "individus";
+    qDebug() << "Taille après mutaion 2" << result.size();
 
     return result;
 }
@@ -427,7 +429,7 @@ void MainWindow::on_pbLoad_clicked() {
 
 void MainWindow::onTimer() {
     if(game.step()) {
-        if(showGame || idx < ELITE) {
+        if(showGame) {
             gameWidget->setGame(game);
             reseauWidget->setReseau(game.getReseau());
         }
@@ -442,14 +444,20 @@ void MainWindow::onTimer() {
             Game::GameResult gr = game.getResult();
 
             if(!gr.perdu) {
-                if(gr.score > bestScore) {
-                    bestScore = gr.score;
+                if(gr.scoreVisite > bestScoreVisite) {
+                    bestScoreVisite = gr.scoreVisite;
                 }
-                if(gr.score > bestScoreGeneration) {
-                    bestScoreGeneration = gr.score;
+                if(gr.scoreVisite > bestScoreVisiteGeneration) {
+                    bestScoreVisiteGeneration = gr.scoreVisite;
+                }
+                if(gr.scorePasteque > bestScorePasteque) {
+                    bestScorePasteque = gr.scorePasteque;
+                }
+                if(gr.scorePasteque > bestScorePastequeGeneration) {
+                    bestScorePastequeGeneration = gr.scorePasteque;
                 }
 
-                lblBestScore->setText(QString().number(bestScoreGeneration)+QString(" / ")+QString().number(bestScore));
+                lblBestScore->setText(QString().number(bestScoreVisiteGeneration)+QString(" / ")+QString().number(bestScoreVisite)+QString(" -- ")+QString().number(bestScorePastequeGeneration)+QString(" / ")+QString().number(bestScorePasteque));
 
                 generation.append(gr);
             }
@@ -462,22 +470,15 @@ void MainWindow::onTimer() {
                 poids = newGeneration[idx];
             }           
         } else {
-            qDebug() << "Survivants :" << generation.size() << bestScoreGeneration << bestScore;
-            Game::SortGameResult sorter;
+            qDebug() << "Survivants :" << generation.size() << bestScoreVisiteGeneration << bestScoreVisite;
+            Game::SortGameResultByVisite sorterVisite;
+            Game::SortGameResultByPasteque sorterPasteque;
 
-            for(int i=0;i<ELITE && i < generation.size();i++) {
-                qDebug() << generation[i].score << getHash(generation[i].poids);
-            }
-            qDebug() << "--";
-
-            std::sort(generation.begin(), generation.end(), sorter);
-
-            for(int i=0;i<ELITE && i < generation.size();i++) {
-                qDebug() << generation[i].score << getHash(generation[i].poids);;
-            }
-            qDebug() << "--";
-
+            std::sort(generation.begin(), generation.end(), sorterVisite);
             newGeneration = fusion();
+
+            std::sort(generation.begin(), generation.end(), sorterPasteque);
+            newGeneration.append(fusion());
 
             QMap<QString, int>::iterator i;
             QList<QString> toRemove;
@@ -496,9 +497,9 @@ void MainWindow::onTimer() {
             idx = 0;
             idxGeneration++;
             if(newGeneration.size()) poids = newGeneration[idx];
-            bestScoreGeneration = 0;
+            bestScoreVisiteGeneration = bestScorePastequeGeneration = 0;
 
-            lblBestScore->setText(QString().number(bestScoreGeneration)+QString(" / ")+QString().number(bestScore));
+            lblBestScore->setText(QString().number(bestScoreVisiteGeneration)+QString(" / ")+QString().number(bestScoreVisite));
 
             if(cbStopGen->checkState() == Qt::CheckState::Checked) {
                 on_pbStop_clicked();

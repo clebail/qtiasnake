@@ -51,6 +51,7 @@ Game::Game(int largeur, int hauteur, const Reseau::Poids &poids) {
 
     perdu = turnRight = turnLeft = false;
     turns[0] = turns[1] = 0;
+    limiteVisite = LIMITE_VISITE;
 }
 
 int Game::getLargeur() {
@@ -110,19 +111,23 @@ bool Game::step() {
 
             nextPasteque();
             nbMouvement = 0;
+            limiteVisite += 2;
         }
 
         if(!caseVisite.contains(idCase)) {
             caseVisite.insert(idCase, 1);
         } else {
             caseVisite[idCase]++;
+            if(caseVisite[idCase] == limiteVisite) {
+                return false;
+            }
         }
 
         totMouvement++;
         if(nbMouvement == maxMouvement) {
 
-            perdu = snake.size() == 4 && caseVisite.size() < 50;
-            perdu |= (!turnLeft || !turnRight);
+            //perdu = snake.size() == 4 && caseVisite.size() < 50;
+            //perdu |= (!turnLeft || !turnRight);
 
             return false;
         }
@@ -162,9 +167,6 @@ void Game::setReseau(const Reseau& reseau) {
 Game::GameResult Game::getResult() const {
     Game::GameResult gr;
     float m = 0;
-    float t = (turns[0] + turns[1]) / 2.0;
-
-    t = 20000 * t / qMax(turns[0], turns[1]);
 
     foreach(auto i, caseVisite.values()) {
         m += i;
@@ -173,10 +175,11 @@ Game::GameResult Game::getResult() const {
     m /= (float)caseVisite.size();
 
     gr.poids = reseau.getPoids();
-    gr.score = (totMouvement * 10 / (nbCgtDir ?: 1)+ (snake.size() - 4) * 10000) * (perdu ? 0 : 1);
+    //gr.score = (totMouvement * 10 / (nbCgtDir ?: 1)+ (snake.size() - 4) * 10000) * (perdu ? 0 : 1);
     //gr.score = ((snake.size() - 4) * 1000) * (perdu ? 0 : 1);
-    gr.score = (qMax(caseVisite.size() / m, 1.0F) + (int)t + (snake.size() - 4) * 100000) * (perdu ? 0 : 1);
-
+    //gr.score = (qMax(caseVisite.size() / m, 1.0F) + turns[0] + turns[1] + (snake.size() - 4) * 10000) * (perdu ? 0 : 1);
+    gr.scoreVisite = caseVisite.size();
+    gr.scorePasteque = snake.size() - 4;
 
     gr.perdu = perdu;
 

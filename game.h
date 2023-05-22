@@ -8,6 +8,7 @@
 #include "reseau.h"
 
 #define NB_DIRECTION            4
+#define LIMITE_VISITE           4
 
 class Game {
 public:
@@ -15,13 +16,18 @@ public:
 
     typedef struct _GameResult {
         Reseau::Poids poids;
-        int score;
+        int scoreVisite;
+        int scorePasteque;
         bool perdu;
     } GameResult;
 
-    typedef struct _SortGameResult {
-        bool operator()(Game::GameResult a, Game::GameResult b) const { return a.score > b.score; }
-    } SortGameResult;
+    typedef struct _SortGameResultByVisite {
+        bool operator() (Game::GameResult a, Game::GameResult b) const { return a.scoreVisite > b.scoreVisite; }
+    } SortGameResultByVisite;
+
+    typedef struct _SortGameResultByPasteque {
+        bool operator() (Game::GameResult a, Game::GameResult b) const { return a.scorePasteque > b.scorePasteque; }
+    } SortGameResultByPasteque;
 
     Game(int largeur = 12, int hauteur = 12, const Reseau::Poids& poids = Reseau::Poids());
     int getLargeur();
@@ -57,6 +63,7 @@ private:
     int nbCgtDir;
     bool turnRight, turnLeft;
     int turns[2];
+    int limiteVisite;
 
     Sensor::ESensorType cellFree(const QPoint& p, const Sensor::ESensorType& toIgnore = Sensor::estNone) const;
     void calculSensors();
