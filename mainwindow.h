@@ -7,8 +7,8 @@
 
 #define SIZE_GENERATION     1000
 #define ELITE               5
-#define NB_ACCOUPLE         30
-#define NB_MUTE             30
+#define NB_ACCOUPLE         20
+#define NB_MUTE             20
 #define TABOU_TIME          10
 
 class MainWindow : public QMainWindow, private Ui::MainWindow
@@ -38,6 +38,7 @@ private:
     void newGame(const Reseau::Poids& poids = Reseau::Poids());
     QList<Reseau::Poids> fusion(bool gardeElite = true) const;
     QString getHash(const Reseau::Poids& poids) const;
+    void organizeGeneration();
 
 private slots:
     void on_pbStart_clicked();

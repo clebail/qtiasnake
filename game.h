@@ -13,12 +13,20 @@
 class Game {
 public:
     typedef enum { edHaut = 0, edDroite = 1, edBas = 2, edGauche = 3 } Direction;
+    typedef enum { stVisite = 0, stPasteque = 1 } ScoreType;
 
     typedef struct _GameResult {
         Reseau::Poids poids;
         int scoreVisite;
         int scorePasteque;
         bool perdu;
+
+        int getScore(const ScoreType& scoreType) const {
+            if(scoreType == stVisite) {
+                return scoreVisite;
+            }
+            return scorePasteque;
+        }
     } GameResult;
 
     typedef struct _SortGameResultByVisite {

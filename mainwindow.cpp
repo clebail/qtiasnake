@@ -259,7 +259,7 @@ QList<Reseau::Poids> MainWindow::fusion(bool gardeElite) const {
     return result;
 }
 
-QString  MainWindow::getHash(const Reseau::Poids& poids) const {
+QString MainWindow::getHash(const Reseau::Poids& poids) const {
     QString notHash = "";
     QString s = "";
 
@@ -278,6 +278,30 @@ QString  MainWindow::getHash(const Reseau::Poids& poids) const {
     }
 
     return QString(QCryptographicHash::hash(notHash.toLatin1(), QCryptographicHash::Md5).toHex());
+}
+
+void MainWindow::organizeGeneration() {
+    Game::ScoreType currentScoreType = Game::stVisite;
+    int i, j;
+
+    for(i=0;i<generation.size();i++) {
+        int max = 0;
+        int idx = 0;
+        bool first = true;
+
+        for(j=i;j<generation.size();j++) {
+            if(first || generation[j].getScore(currentScoreType) > max) {
+                max = generation[j].getScore(currentScoreType);
+                idx = j;
+                first = false;
+            }
+        }
+
+        if(idx != i) {
+            generation.insert(i, generation.takeAt(idx));
+        }
+        currentScoreType = (Game::ScoreType)(1 - (int)currentScoreType);
+    }
 }
 
 void MainWindow::on_pbStart_clicked() {
@@ -479,6 +503,9 @@ void MainWindow::onTimer() {
 
             std::sort(generation.begin(), generation.end(), sorterPasteque);
             newGeneration.append(fusion());
+
+            organizeGeneration();
+            newGeneration.append(fusion(false));
 
             QMap<QString, int>::iterator i;
             QList<QString> toRemove;
