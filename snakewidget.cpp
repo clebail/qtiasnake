@@ -45,6 +45,8 @@ void SnakeWidget::drawGame(QPainter *painter) {
     painter->setPen(QColorConstants::Black);
     for(int x=0;x<largeur;x++) {
         for(int y=0;y<hauteur;y++) {
+            int idCase = x + y * largeur;
+
             if(x == 0 || y == 0 || x == largeur - 1 || y == hauteur - 1) {
                painter->setBrush(QColorConstants::Gray);
 
@@ -54,6 +56,10 @@ void SnakeWidget::drawGame(QPainter *painter) {
                } else {
                    painter->drawText(QRectF(xMargin + x * caseSize, yMargin + y * caseSize + 2, caseSize, caseSize), QString().number(y), QTextOption(Qt::AlignHCenter));
                }
+            } else if(game.getCaseVisite().contains(idCase)) {
+                painter->setBrush(QColorConstants::LightGray);
+
+                painter->drawRect(QRectF(xMargin + x * caseSize, yMargin + y * caseSize, caseSize, caseSize));
             }
         }
     }

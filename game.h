@@ -52,6 +52,7 @@ public:
     Game::GameResult getResult() const;
     int getNbCaseVisite() const;
     int getNbNeurone() const;
+    QMap<int, int> getCaseVisite() const;
 private:
     int largeur;
     int hauteur;

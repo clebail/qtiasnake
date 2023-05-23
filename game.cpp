@@ -111,7 +111,7 @@ bool Game::step() {
 
             nextPasteque();
             nbMouvement = 0;
-            limiteVisite += 2;
+            limiteVisite += LIMITE_VISITE;
         }
 
         if(!caseVisite.contains(idCase)) {
@@ -124,13 +124,13 @@ bool Game::step() {
         }
 
         totMouvement++;
-        if(nbMouvement == maxMouvement) {
+        /*if(nbMouvement == maxMouvement) {
 
-            //perdu = snake.size() == 4 && caseVisite.size() < 50;
-            //perdu |= (!turnLeft || !turnRight);
+            perdu = snake.size() == 4 && caseVisite.size() < 50;
+            perdu |= (!turnLeft || !turnRight);
 
             return false;
-        }
+        }*/
 
         calculSensors();
         next();
@@ -178,8 +178,8 @@ Game::GameResult Game::getResult() const {
     //gr.score = (totMouvement * 10 / (nbCgtDir ?: 1)+ (snake.size() - 4) * 10000) * (perdu ? 0 : 1);
     //gr.score = ((snake.size() - 4) * 1000) * (perdu ? 0 : 1);
     //gr.score = (qMax(caseVisite.size() / m, 1.0F) + turns[0] + turns[1] + (snake.size() - 4) * 10000) * (perdu ? 0 : 1);
-    gr.scoreVisite = caseVisite.size();
-    gr.scorePasteque = snake.size() - 4;
+    gr.scoreVisite = caseVisite.size() * (perdu ? 0 : 1) * (!turns[0] || !turns[1] ? 0 : 1);
+    gr.scorePasteque =(snake.size() - 4) * (perdu ? 0 : 1) * (!turns[0] || !turns[1] ? 0 : 1);
 
     gr.perdu = perdu;
 
@@ -192,6 +192,10 @@ int Game::getNbCaseVisite() const {
 
 int Game::getNbNeurone() const {
     return reseau.getNbNeurone();
+}
+
+QMap<int, int> Game::getCaseVisite() const {
+    return caseVisite;
 }
 
 Sensor::ESensorType Game::cellFree(const QPoint& p, const Sensor::ESensorType &toIgnore) const {
