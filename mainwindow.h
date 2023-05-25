@@ -7,8 +7,8 @@
 
 #define SIZE_GENERATION     1000
 #define ELITE               5
-#define NB_ACCOUPLE         20
-#define NB_MUTE             20
+#define NB_ACCOUPLE         60
+#define NB_MUTE             60
 #define TABOU_TIME          10
 
 class MainWindow : public QMainWindow, private Ui::MainWindow

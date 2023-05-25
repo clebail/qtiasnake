@@ -167,6 +167,7 @@ void Game::setReseau(const Reseau& reseau) {
 Game::GameResult Game::getResult() const {
     Game::GameResult gr;
     float m = 0;
+    int t = 0;
 
     foreach(auto i, caseVisite.values()) {
         m += i;
@@ -174,11 +175,15 @@ Game::GameResult Game::getResult() const {
 
     m /= (float)caseVisite.size();
 
+    if(turns[0] && turns[1]) {
+        t = 99 * (turns[0] + turns[1]) / qMax(turns[0], turns[1]);
+    }
+
     gr.poids = reseau.getPoids();
     //gr.score = (totMouvement * 10 / (nbCgtDir ?: 1)+ (snake.size() - 4) * 10000) * (perdu ? 0 : 1);
     //gr.score = ((snake.size() - 4) * 1000) * (perdu ? 0 : 1);
     //gr.score = (qMax(caseVisite.size() / m, 1.0F) + turns[0] + turns[1] + (snake.size() - 4) * 10000) * (perdu ? 0 : 1);
-    gr.scoreVisite = caseVisite.size() * (perdu ? 0 : 1) * (!turns[0] || !turns[1] ? 0 : 1);
+    gr.scoreVisite = (t + 100 * caseVisite.size() + (snake.size() - 4) * 100000) * (perdu ? 0 : 1) * (!turns[0] || !turns[1] ? 0 : 1);
     gr.scorePasteque =(snake.size() - 4) * (perdu ? 0 : 1) * (!turns[0] || !turns[1] ? 0 : 1);
 
     gr.perdu = perdu;

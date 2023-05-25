@@ -501,11 +501,11 @@ void MainWindow::onTimer() {
             std::sort(generation.begin(), generation.end(), sorterVisite);
             newGeneration = fusion();
 
-            std::sort(generation.begin(), generation.end(), sorterPasteque);
+            /*std::sort(generation.begin(), generation.end(), sorterPasteque);
             newGeneration.append(fusion());
 
             organizeGeneration();
-            newGeneration.append(fusion(false));
+            newGeneration.append(fusion(false));*/
 
             QMap<QString, int>::iterator i;
             QList<QString> toRemove;
