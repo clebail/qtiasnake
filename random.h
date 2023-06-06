@@ -4,7 +4,7 @@
 #include <random>
 
 #define MAX_POIDS   ((float)1.0)
-#define MUTE_STEP   ((float)0.5)
+#define MUTE_STEP   ((float)0.1)
 
 class Random
 {
