@@ -15,10 +15,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 
     timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(onTimer()));
-    timer->setInterval(10);
+    timer->setInterval(1);
     gameWidget->showSensors(false);
 
     idx = bestScoreVisite = idxGeneration = bestScoreVisiteGeneration = bestScorePasteque = bestScorePastequeGeneration = 0;
+    evalRun = survived = 0;
+    accScoreVisite = accScorePasteque = 0;
     showGame = true;
 
     newGame();
@@ -197,8 +199,11 @@ QList<Reseau::Poids> MainWindow::fusion(bool gardeElite) const {
                     QList<float> lprn;
 
                     for(int l=0;l<lpn.size();l++) {
-                        int m = rand() % 9;
-                        lprn.append(lpn[l] + (m >= 6 ? MUTE_STEP : m >= 3 ? - MUTE_STEP : 0));
+                        float w = lpn[l];
+                        if(rand() % 100 < MUTE_RATE) {
+                            w += Random::muteNoise();
+                        }
+                        lprn.append(w);
                     }
 
                     lprc.append(lprn);
@@ -235,11 +240,11 @@ QList<Reseau::Poids> MainWindow::fusion(bool gardeElite) const {
                     QList<float> lprn;
 
                     for(int l=0;l<lpn.size();l++) {
-                        float p = lpn[l];
-                        if(rand() % 5 >= 8) {
-                            p = Random::generePoid();
+                        float w = lpn[l];
+                        if(rand() % 100 < RESET_RATE) {
+                            w = Random::generePoid();
                         }
-                        lprn.append(p);
+                        lprn.append(w);
                     }
 
                     lprc.append(lprn);
@@ -376,6 +381,7 @@ void MainWindow::on_pbSave_clicked() {
             generationData.append(generationMemberData);
         }
 
+        json["input_size"] = game.getReseau().getCouches().first().getNbEntree();
         json["generation_idx"] = idxGeneration;
         json["generation_data"] = generationData;
 
@@ -413,7 +419,7 @@ void MainWindow::on_pbLoad_clicked() {
                         QJsonArray generationData = jsonObj["generation_data"].toArray();
                         QJsonArray::Iterator i;
 
-                        newGeneration.clear();
+                        QList<Reseau::Poids> loaded;
                         for(i=generationData.begin();i!=generationData.end();++i) {
                             QJsonArray generationMemberData = (*i).toArray();
                             QJsonArray::Iterator j;
@@ -439,11 +445,31 @@ void MainWindow::on_pbLoad_clicked() {
                                poids.append(couchePoids);
                            }
 
-                           newGeneration.append(poids);
+                           loaded.append(poids);
                         }
 
+                        // Validation : un neurone de la 1re couche doit avoir
+                        // (nbEntree + biais) poids, sinon le fichier vient d'une
+                        // autre architecture et serait utilisé en silence à tort.
+                        int expected = game.getReseau().getCouches().first().getNbEntree() + 1;
+                        if(loaded.isEmpty() || loaded.first().isEmpty() ||
+                           loaded.first().first().isEmpty() ||
+                           loaded.first().first().first().size() != expected) {
+                            qWarning() << "Import annulé : architecture incompatible"
+                                       << "(attendu" << expected << "poids par neurone d'entrée, lu"
+                                       << (loaded.isEmpty() || loaded.first().isEmpty() || loaded.first().first().isEmpty()
+                                           ? 0 : loaded.first().first().first().size()) << ")";
+                            return;
+                        }
+
+                        newGeneration = loaded;
                         idxGeneration = jsonObj["generation_idx"].toInt();
                         idx = 0;
+                        evalRun = survived = 0;
+                        accScoreVisite = accScorePasteque = 0;
+                        generation.clear();
+                        poids = newGeneration.first();
+                        newGame(poids);
                     }
                 }
             }
@@ -467,32 +493,62 @@ void MainWindow::onTimer() {
         if(idx < qMax(SIZE_GENERATION, newGeneration.size())) {
             Game::GameResult gr = game.getResult();
 
+            // On fige les poids réellement joués au 1er run : pour un individu
+            // aléatoire (au-delà de newGeneration), newGame() en regénère sinon
+            // un différent, et on moyennerait des réseaux distincts.
+            if(evalRun == 0) {
+                currentWeights = gr.poids;
+            }
+
+            accScoreVisite += gr.scoreVisite;
+            accScorePasteque += gr.scorePasteque;
             if(!gr.perdu) {
-                if(gr.scoreVisite > bestScoreVisite) {
-                    bestScoreVisite = gr.scoreVisite;
+                survived++;
+            }
+
+            evalRun++;
+            if(evalRun < NB_EVAL) {
+                newGame(currentWeights);   // même réseau, plateau différent
+                return;
+            }
+
+            // NB_EVAL parties faites : on agrège (moyenne) avant de juger.
+            Game::GameResult gr2;
+            gr2.poids = currentWeights;
+            gr2.scoreVisite = (int)(accScoreVisite / NB_EVAL);
+            gr2.scorePasteque = (int)(accScorePasteque / NB_EVAL);
+            gr2.perdu = (survived == 0);   // perdu seulement s'il meurt sur les NB_EVAL
+
+            if(!gr2.perdu) {
+                if(gr2.scoreVisite > bestScoreVisite) {
+                    bestScoreVisite = gr2.scoreVisite;
                 }
-                if(gr.scoreVisite > bestScoreVisiteGeneration) {
-                    bestScoreVisiteGeneration = gr.scoreVisite;
+                if(gr2.scoreVisite > bestScoreVisiteGeneration) {
+                    bestScoreVisiteGeneration = gr2.scoreVisite;
                 }
-                if(gr.scorePasteque > bestScorePasteque) {
-                    bestScorePasteque = gr.scorePasteque;
+                if(gr2.scorePasteque > bestScorePasteque) {
+                    bestScorePasteque = gr2.scorePasteque;
                 }
-                if(gr.scorePasteque > bestScorePastequeGeneration) {
-                    bestScorePastequeGeneration = gr.scorePasteque;
+                if(gr2.scorePasteque > bestScorePastequeGeneration) {
+                    bestScorePastequeGeneration = gr2.scorePasteque;
                 }
 
                 lblBestScore->setText(QString().number(bestScoreVisiteGeneration)+QString(" / ")+QString().number(bestScoreVisite)+QString(" -- ")+QString().number(bestScorePastequeGeneration)+QString(" / ")+QString().number(bestScorePasteque));
 
-                generation.append(gr);
+                generation.append(gr2);
             }
 
-            tabou.insert(getHash(gr.poids), TABOU_TIME);
+            tabou.insert(getHash(gr2.poids), TABOU_TIME);
+
+            accScoreVisite = accScorePasteque = 0;
+            survived = 0;
+            evalRun = 0;
 
             poids = Reseau::Poids();
             idx++;
             if(idx < newGeneration.size()) {
                 poids = newGeneration[idx];
-            }           
+            }
         } else {
             qDebug() << "Survivants :" << generation.size() << bestScoreVisiteGeneration << bestScoreVisite;
             Game::SortGameResultByVisite sorterVisite;
@@ -522,6 +578,8 @@ void MainWindow::onTimer() {
 
             generation.clear();
             idx = 0;
+            evalRun = survived = 0;
+            accScoreVisite = accScorePasteque = 0;
             idxGeneration++;
             if(newGeneration.size()) poids = newGeneration[idx];
             bestScoreVisiteGeneration = bestScorePastequeGeneration = 0;

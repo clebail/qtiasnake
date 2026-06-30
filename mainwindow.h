@@ -10,6 +10,7 @@
 #define NB_ACCOUPLE         75
 #define NB_MUTE             75
 #define TABOU_TIME          10
+#define NB_EVAL             5
 
 class MainWindow : public QMainWindow, private Ui::MainWindow
 {
@@ -34,6 +35,13 @@ private:
     Reseau::Poids poids;
     bool over = false;
     QMap<QString, int> tabou;
+
+    // Évaluation de chaque individu sur NB_EVAL parties (anti-bruit).
+    int evalRun;
+    int survived;
+    qint64 accScoreVisite;
+    qint64 accScorePasteque;
+    Reseau::Poids currentWeights;
 
     void newGame(const Reseau::Poids& poids = Reseau::Poids());
     QList<Reseau::Poids> fusion(bool gardeElite = true) const;

@@ -367,11 +367,19 @@ void Game::next() {
         }
     }
 
+    // Direction de la pastèque, relative à l'orientation de la tête.
+    // Repère écran (y vers le bas) : avant = (fX, fY), droite = (-fY, fX).
+    {
+        int fX, fY;
+        getIncs(direction, fX, fY);
+        int rX = -fY, rY = fX;
 
-    /*entrees.append(incX);
-    entrees.append(incY);
-    entrees.append(queueIncX);
-    entrees.append(queueIncY);*/
+        float nx = (pasteque.x() - tete.x()) / (float)(largeur - 1);
+        float ny = (pasteque.y() - tete.y()) / (float)(hauteur - 1);
+
+        entrees.append(nx * fX + ny * fY);   // composante avant
+        entrees.append(nx * rX + ny * rY);   // composante droite
+    }
 
     sorties = reseau.eval(entrees);
     for(int i=0;i<sorties.size();i++) {
@@ -415,7 +423,7 @@ void Game::initReseau() {
     functions.append(Neurone::efSigmoide);
     functions.append(Neurone::efRelu);
 
-    reseau.addCouche(Couche(24, 24, functions[0]));
+    reseau.addCouche(Couche(26, 24, functions[0]));
     reseau.addCouche(Couche(24, 12, functions[1]));
     reseau.addCouche(Couche(12, 8, functions[2]));
     reseau.addCouche(Couche(8, 3, functions[3]));
