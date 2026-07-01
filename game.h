@@ -5,90 +5,47 @@
 #include <QMap>
 #include <QPoint>
 #include <QVector>
-#include "sensor.h"
-#include "reseau.h"
 
 #define NB_DIRECTION            4
-#define LIMITE_VISITE           4
-#define COUT_MOUVEMENT          20      // pénalité par pas depuis la dernière pastèque (efficacité)
-#define BONUS_EQUILIBRE         0       // bonus par virage du sens minoritaire (0 = désactivé, gameable)
 
 class Game {
 public:
     typedef enum { edHaut = 0, edDroite = 1, edBas = 2, edGauche = 3 } Direction;
-    typedef enum { stVisite = 0, stPasteque = 1 } ScoreType;
 
-    typedef struct _GameResult {
-        Reseau::Poids poids;
-        int scoreVisite;
-        int scorePasteque;
-        bool perdu;
+    Game(int largeur = 22, int hauteur = 22);
 
-        int getScore(const ScoreType& scoreType) const {
-            if(scoreType == stVisite) {
-                return scoreVisite;
-            }
-            return scorePasteque;
-        }
-    } GameResult;
-
-    typedef struct _SortGameResultByVisite {
-        bool operator() (Game::GameResult a, Game::GameResult b) const { return a.scoreVisite > b.scoreVisite; }
-    } SortGameResultByVisite;
-
-    typedef struct _SortGameResultByPasteque {
-        bool operator() (Game::GameResult a, Game::GameResult b) const { return a.scorePasteque > b.scorePasteque; }
-    } SortGameResultByPasteque;
-
-    Game(int largeur = 12, int hauteur = 12, const Reseau::Poids& poids = Reseau::Poids());
-    int getLargeur();
-    int getHauteur();
+    int getLargeur() const;
+    int getHauteur() const;
     const QList<QPoint>& getSnake() const;
-    const QList<Sensor> &getSensors() const;
     const QPoint& getPasteque() const;
-    bool step();
-    int getTotMouvement() const;
-    int getNbMouvement() const;
-    int getMaxMouvement() const;
-    const Reseau& getReseau() const;
-    void setReseau(const Reseau& reseau);
-    Game::GameResult getResult() const;
-    int getNbCaseVisite() const;
-    int getNbNeurone() const;
     QMap<int, int> getCaseVisite() const;
-    static void resetPasteques();
+    int getTotMouvement() const;
+
+    Direction getDirection() const;
+    void setDirection(const Direction& direction);   // le solveur choisit le prochain cap
+
+    bool isOccupe(const QPoint& p) const;             // case occupée par le serpent
+    bool isLibre(const QPoint& p) const;              // dans le plateau (hors murs) et libre
+
+    bool step();                                      // avance d'un pas ; false si mort ou gagné
+    bool estGagne() const;                            // le serpent remplit le plateau
+
+    void getIncs(const Direction& direction, int& incX, int& incY) const;
+
 private:
     int largeur;
     int hauteur;
     QList<QPoint> snake;
     QVector<char> occupe;       // grille d'occupation du serpent (1 = case occupée)
-    QList<Sensor> sensors;
     QPoint pasteque;
-    int nbMouvement;
+    Direction direction;
     int totMouvement;
-    Reseau reseau;
-    float diagonale;
     QMap<int, int> caseVisite;
-    bool perdu;
-    Game::Direction direction;
-    Game::Direction queueDirection;
-    int maxMouvement;
-    int idPasteque;
-    int nbCgtDir;
-    bool turnRight, turnLeft;
-    int turns[2];
-    int limiteVisite;
+    bool gagne;
 
-    Sensor::ESensorType cellFree(const QPoint& p, const Sensor::ESensorType& toIgnore = Sensor::estNone) const;
-    void calculSensors();
-    Sensor getFirstCellOccupe(int incX, int incY, const Sensor::ESensorType& toIgnore = Sensor::estNone) const;
-    void addSensorsForDirection(int incX, int incY);
+    int idx(const QPoint& p) const;
     QPoint newPasteque() const;
     void nextPasteque();
-    void next();
-    void initReseau();
-    void getIncs(const Direction &direction, int &incX, int &incY) const;
-    Game::Direction calculDirection(int incX, int incY);
 };
 
 #endif // GAME_H

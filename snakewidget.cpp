@@ -1,19 +1,11 @@
 #include "snakewidget.h"
 
 SnakeWidget::SnakeWidget(QWidget *parent) : QWidget(parent) {
-   sensors = true;
 }
 
 void SnakeWidget::setGame(const Game& game) {
     this->game = game;
     repaint();
-}
-
-void SnakeWidget::showSensors(bool sensors) {
-    if(this->sensors != sensors) {
-        this->sensors = sensors;
-        repaint();
-    }
 }
 
 void SnakeWidget::paintEvent(QPaintEvent *) {
@@ -37,9 +29,7 @@ void SnakeWidget::drawGame(QPainter *painter) {
     float xMargin = ((float)width() - (float)(caseSize * largeur)) / 2.0;
     float yMargin = ((float)height() - (float)(caseSize * hauteur)) / 2.0;
     QList<QPoint> snake = game.getSnake();
-    QList<Sensor> sensors = game.getSensors();
     QPoint pasteque = game.getPasteque();
-    QPoint tete;
 
     // Cases : murs (gris) et cases visitées (gris clair)
     painter->setPen(Qt::NoPen);
@@ -87,8 +77,6 @@ void SnakeWidget::drawGame(QPainter *painter) {
         QPoint p = snake[k];
         QRectF r(xMargin + p.x() * caseSize + m, yMargin + p.y() * caseSize + m, seg, seg);
         bool head = (k == 0);
-
-        if(head) tete = p;
 
         QLinearGradient g(r.topLeft(), r.bottomRight());
         g.setColorAt(0, head ? QColor(45, 170, 65) : QColor(65, 195, 85));
@@ -138,21 +126,5 @@ void SnakeWidget::drawGame(QPainter *painter) {
         painter->drawEllipse(QPointF(ri.center().x() - ri.width() * 0.15, ri.center().y() - ri.height() * 0.10), sd, sd);
         painter->drawEllipse(QPointF(ri.center().x() + ri.width() * 0.18, ri.center().y() - ri.height() * 0.05), sd, sd);
         painter->drawEllipse(QPointF(ri.center().x() - ri.width() * 0.02, ri.center().y() + ri.height() * 0.18), sd, sd);
-    }
-
-    if(!tete.isNull() && this->sensors && sensors.size()) {
-        int caseSize2 = caseSize / 2;
-        int startX = xMargin + tete.x() * caseSize + caseSize2;
-        int startY = yMargin + tete.y() * caseSize + caseSize2;
-        QPoint start(startX, startY);
-
-        for(int i=0;i<sensors.size();i++) {
-            QPoint ps = sensors[i].getPoint();
-            QPoint p(xMargin + ps.x() * caseSize + caseSize2, yMargin + ps.y() * caseSize + caseSize2);
-            QColor color = sensors[i].getType() == Sensor::estPasteque ? QColorConstants::Green : (sensors[i].getType() == Sensor::estSnake ? QColorConstants::Black : QColorConstants::Gray);
-
-            painter->setPen(color);
-            painter->drawLine(start, p);
-        }
     }
 }

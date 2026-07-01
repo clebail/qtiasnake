@@ -11,15 +11,12 @@ class SnakeWidget : public QWidget
 public:
     explicit SnakeWidget(QWidget *parent = nullptr);
     void setGame(const Game& game);
-    void setPasteque(const QPoint& pasteque);
-    void showSensors(bool sensors);
 
 protected:
     virtual void paintEvent(QPaintEvent *);
 
 private:
     Game game;
-    bool sensors;
 
     void drawGame(QPainter *painter);
 };
