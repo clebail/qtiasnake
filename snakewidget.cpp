@@ -1,3 +1,5 @@
+#include <QStringList>
+#include <QFont>
 #include "snakewidget.h"
 
 SnakeWidget::SnakeWidget(QWidget *parent) : QWidget(parent) {
@@ -27,15 +29,20 @@ void SnakeWidget::paintEvent(QPaintEvent *) {
 }
 
 void SnakeWidget::drawGame(QPainter *painter) {
+    renderGame(painter, game, width(), height(), this->sensors);
+}
+
+void SnakeWidget::renderGame(QPainter *painter, Game& game, int w, int h,
+                             bool showSensors, const QString& overlay) {
     painter->setRenderHint(QPainter::Antialiasing, true);
 
     int largeur = game.getLargeur();
     int hauteur = game.getHauteur();
-    float caseWidth = (float)width() / (float)largeur;
-    float caseHeight = (float)height() / (float)hauteur;
+    float caseWidth = (float)w / (float)largeur;
+    float caseHeight = (float)h / (float)hauteur;
     float caseSize = qMin(caseWidth, caseHeight);
-    float xMargin = ((float)width() - (float)(caseSize * largeur)) / 2.0;
-    float yMargin = ((float)height() - (float)(caseSize * hauteur)) / 2.0;
+    float xMargin = ((float)w - (float)(caseSize * largeur)) / 2.0;
+    float yMargin = ((float)h - (float)(caseSize * hauteur)) / 2.0;
     QList<QPoint> snake = game.getSnake();
     QList<Sensor> sensors = game.getSensors();
     QPoint pasteque = game.getPasteque();
@@ -140,7 +147,7 @@ void SnakeWidget::drawGame(QPainter *painter) {
         painter->drawEllipse(QPointF(ri.center().x() - ri.width() * 0.02, ri.center().y() + ri.height() * 0.18), sd, sd);
     }
 
-    if(!tete.isNull() && this->sensors && sensors.size()) {
+    if(!tete.isNull() && showSensors && sensors.size()) {
         int caseSize2 = caseSize / 2;
         int startX = xMargin + tete.x() * caseSize + caseSize2;
         int startY = yMargin + tete.y() * caseSize + caseSize2;
@@ -154,5 +161,30 @@ void SnakeWidget::drawGame(QPainter *painter) {
             painter->setPen(color);
             painter->drawLine(start, p);
         }
+    }
+
+    // Overlay de stats : bandeau semi-transparent en haut, titre + détail.
+    if(!overlay.isEmpty()) {
+        QStringList lines = overlay.split('\n');
+        float bandH = h * 0.12f;
+
+        painter->setPen(Qt::NoPen);
+        painter->setBrush(QColor(0, 0, 0, 160));
+        painter->drawRect(QRectF(0, 0, w, bandH));
+
+        QFont f = painter->font();
+        painter->setPen(QColorConstants::White);
+
+        f.setPixelSize(qMax(1.0f, bandH * 0.34f));
+        f.setBold(true);
+        painter->setFont(f);
+        painter->drawText(QRectF(w * 0.03, 0, w * 0.94, bandH * 0.55),
+                          Qt::AlignVCenter | Qt::AlignLeft, lines.value(0));
+
+        f.setPixelSize(qMax(1.0f, bandH * 0.21f));
+        f.setBold(false);
+        painter->setFont(f);
+        painter->drawText(QRectF(w * 0.03, bandH * 0.5, w * 0.94, bandH * 0.48),
+                          Qt::AlignVCenter | Qt::AlignLeft, lines.value(1));
     }
 }

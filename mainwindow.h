@@ -50,6 +50,17 @@ private:
     QString getHash(const Reseau::Poids& poids) const;
     void organizeGeneration();
 
+    // Capture vidéo (déclenchée par variables d'environnement) : rejeu fidèle
+    // du meilleur individu de chaque génération en frames PNG offscreen.
+    bool videoCapture = false;
+    int videoGens = 100;        // nombre de générations à capturer
+    int videoStride = 1;        // 1 frame sauvée tous les N pas
+    int videoMaxFrames = 100000;// cap de frames par génération
+    int videoW = 800, videoH = 800;
+    QString videoDir = "frames";
+    void captureGeneration();
+    void saveFrame(Game& g, int gen, int frame, int bestPasteque);
+
 private slots:
     void on_pbStart_clicked();
     void on_pbStop_clicked();

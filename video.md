@@ -37,8 +37,54 @@ L'intérêt narratif : partir d'un run **neuf (from 0)** → gén 1 le serpent m
 2. Génération des PNG + script/commande ffmpeg d'assemblage (ou encodage direct).
 3. Petite doc : comment lancer la capture, où sortent les frames/vidéo, params réglables (fps, sous-échantillonnage, nb de générations).
 
-## Décisions à confirmer avec l'utilisateur avant/pendant
-- Rejeu **fidèle** (avant resetPasteques) vs **plateau neuf** ?
-- **Toutes** les 100 générations, ou un échantillon (ex. tous les 5) ?
-- Format **MP4** vs **GIF**, résolution, fps.
-- Contenu exact et style de l'overlay.
+## Décisions confirmées
+- Rejeu **fidèle** (capture de `generation.first().poids` avant `resetPasteques()`).
+- **Toutes** les 100 générations.
+- **MP4**, **800×800**, **30 fps**.
+- Overlay : n° génération (titre) + `Pastèques / Longueur / Mvts / Record` (détail).
+
+## Utilisation (implémenté)
+
+Le mécanisme est **non-intrusif** : rien ne change pour un run normal. La capture
+s'active uniquement par variables d'environnement.
+
+### 1. Lancer la capture
+```bash
+qmake qtiasnake.pro && make
+QTIASNAKE_VIDEO=1 ./qtiasnake
+```
+L'app démarre un **entraînement neuf** (from 0), affichage coupé pour la vitesse,
+capture le meilleur individu de chaque génération, puis **s'arrête seule** après
+`QTIASNAKE_VIDEO_GENS` générations.
+
+Pour capturer sans fenêtre (serveur/headless) : préfixer `QT_QPA_PLATFORM=offscreen`.
+
+### 2. Assembler la vidéo
+```bash
+./make_video.sh                 # frames/  -> video.mp4 @30fps
+./make_video.sh frames out.mp4 30
+```
+
+### Paramètres réglables (variables d'environnement)
+| Variable | Défaut | Rôle |
+|----------|--------|------|
+| `QTIASNAKE_VIDEO`          | (absent) | Active la capture si défini |
+| `QTIASNAKE_VIDEO_GENS`     | `100`    | Nb de générations capturées |
+| `QTIASNAKE_VIDEO_STRIDE`   | `1`      | 1 frame sauvée tous les N pas (sous-échantillonnage) |
+| `QTIASNAKE_VIDEO_MAXFRAMES`| `100000` | Cap de frames par génération |
+| `QTIASNAKE_VIDEO_SIZE`     | `800`    | Côté des frames en px (carré) |
+| `QTIASNAKE_VIDEO_DIR`      | `frames` | Dossier de sortie des PNG |
+
+Astuce volume : les dernières générations jouent des milliers de pas. Si la vidéo
+est trop longue/lourde, augmenter `QTIASNAKE_VIDEO_STRIDE` (ex. `2` ou `3`).
+
+### Où ça sort
+- Frames : `frames/genXXX_frameYYYYY.png` (tri lexicographique = ordre chrono).
+- Vidéo : `video.mp4` à la racine.
+
+### Détails d'implémentation
+- `SnakeWidget::renderGame(painter, game, w, h, sensors, overlay)` : rendu réutilisable
+  offscreen (le `drawGame` du widget visible l'appelle aussi). Overlay dessiné dans
+  la même fonction (bandeau semi-transparent + texte).
+- `MainWindow::captureGeneration()` / `saveFrame()` : rejeu fidèle sur le cache de
+  pastèques intact + sauvegarde `QImage`.

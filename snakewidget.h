@@ -14,6 +14,12 @@ public:
     void setPasteque(const QPoint& pasteque);
     void showSensors(bool sensors);
 
+    // Rendu réutilisable : peint un plateau sur n'importe quel QPainter aux
+    // dimensions données (widget visible OU QImage offscreen). Un overlay
+    // multi-lignes optionnel ('\n' = 1re ligne titre, suivantes = détail).
+    static void renderGame(QPainter *painter, Game& game, int w, int h,
+                           bool showSensors, const QString& overlay = QString());
+
 protected:
     virtual void paintEvent(QPaintEvent *);
 

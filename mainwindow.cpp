@@ -5,7 +5,11 @@
 #include <QFileDialog>
 #include <QtDebug>
 #include <QCryptographicHash>
+#include <QDir>
+#include <QImage>
+#include <QPainter>
 #include "mainwindow.h"
+#include "snakewidget.h"
 #include "random.h"
 
 #define MAX_TEST                100
@@ -22,6 +26,30 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     evalRun = survived = 0;
     accScoreVisite = accScorePasteque = 0;
     showGame = true;
+
+    // Mode capture vidéo : activé via QTIASNAKE_VIDEO=1 (non-intrusif — les runs
+    // normaux ne sont pas affectés). Lance un entraînement neuf, affichage coupé
+    // pour la vitesse, et s'arrête tout seul après videoGens générations.
+    videoCapture = qEnvironmentVariableIsSet("QTIASNAKE_VIDEO");
+    if(videoCapture) {
+        videoGens       = qEnvironmentVariable("QTIASNAKE_VIDEO_GENS", "100").toInt();
+        videoStride     = qMax(1, qEnvironmentVariable("QTIASNAKE_VIDEO_STRIDE", "1").toInt());
+        videoMaxFrames  = qEnvironmentVariable("QTIASNAKE_VIDEO_MAXFRAMES", "100000").toInt();
+        videoDir        = qEnvironmentVariable("QTIASNAKE_VIDEO_DIR", "frames");
+        videoW = videoH = qEnvironmentVariable("QTIASNAKE_VIDEO_SIZE", "800").toInt();
+        QDir().mkpath(videoDir);
+        qDebug() << "Capture vidéo activée:" << videoGens << "gén, stride" << videoStride
+                 << ", dossier" << videoDir << ", taille" << videoW;
+
+        // On coupe l'affichage (vitesse) et on démarre l'entraînement seulement
+        // après le newGame() initial ci-dessous, qui a peuplé gameWidget/reseauWidget
+        // avec un réseau valide (sinon leur paintEvent peint du vide → crash).
+        QTimer::singleShot(0, this, [this]() {
+            showGame = false;
+            cbShowGame->setChecked(false);
+            on_pbStart_clicked();
+        });
+    }
 
     newGame();
 }
@@ -603,6 +631,13 @@ void MainWindow::iterate() {
             Game::SortGameResultByPasteque sorterPasteque;
 
             std::sort(generation.begin(), generation.end(), sorterVisite);
+
+            // Rejeu fidèle du meilleur : le cache de pastèques est encore intact
+            // (resetPasteques() plus bas), donc on reproduit exactement la partie.
+            if(videoCapture && idxGeneration < videoGens) {
+                captureGeneration();
+            }
+
             newGeneration = fusion();
 
             /*std::sort(generation.begin(), generation.end(), sorterPasteque);
@@ -638,8 +673,74 @@ void MainWindow::iterate() {
             if(cbStopGen->checkState() == Qt::CheckState::Checked) {
                 on_pbStop_clicked();
             }
-        }       
+
+            if(videoCapture && idxGeneration >= videoGens) {
+                on_pbStop_clicked();
+                qDebug() << "Capture vidéo terminée:" << videoGens
+                         << "générations dans" << videoDir;
+            }
+        }
 
         newGame(poids);
     }
+}
+
+void MainWindow::captureGeneration() {
+    if(generation.isEmpty()) {
+        return;
+    }
+
+    const Game::GameResult& best = generation.first();
+    int gen = idxGeneration + 1;   // libellé 1-based
+
+    // Rejeu sur le cache de pastèques encore intact → partie identique à celle
+    // qui a produit best.scoreVisite / best.scorePasteque en entraînement.
+    Game replay(22, 22, best.poids);
+
+    int step = 0;
+    int frame = 0;
+    while(true) {
+        if(step % videoStride == 0) {
+            saveFrame(replay, gen, frame++, best.scorePasteque);
+            if(frame >= videoMaxFrames) {
+                break;
+            }
+        }
+        step++;
+        if(!replay.step()) {
+            break;
+        }
+    }
+
+    qDebug() << "Gén" << gen << ": rejeu" << step << "pas ->" << frame << "frames"
+             << "(record" << best.scorePasteque << "pastèques)";
+}
+
+void MainWindow::saveFrame(Game& g, int gen, int frame, int bestPasteque) {
+    QImage image(videoW, videoH, QImage::Format_RGB32);
+    image.fill(Qt::white);
+
+    QPainter painter(&image);
+    painter.setPen(QColorConstants::Black);
+    painter.setBrush(QColorConstants::White);
+    painter.drawRect(QRect(0, 0, videoW - 1, videoH - 1));
+
+    // Stats courantes du rejeu + record de la génération.
+    int pasteques = g.getSnake().size() - 4;
+    int longueur = g.getSnake().size();
+    QString overlay = QString("Génération %1").arg(gen)
+        + "\n"
+        + QString("Pastèques: %1   •   Longueur: %2   •   Mvts: %3   •   Record: %4")
+              .arg(pasteques).arg(longueur).arg(g.getTotMouvement()).arg(bestPasteque);
+
+    SnakeWidget::renderGame(&painter, g, videoW, videoH, false, overlay);
+    painter.end();
+
+    // Zéro-padding : le tri lexicographique du glob ffmpeg donne l'ordre chrono
+    // (gen001_frame00000 < gen001_frame00001 < ... < gen002_frame00000).
+    QString name = QString("%1/gen%2_frame%3.png")
+        .arg(videoDir)
+        .arg(gen, 3, 10, QChar('0'))
+        .arg(frame, 5, 10, QChar('0'));
+    image.save(name);
 }
