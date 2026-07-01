@@ -31,17 +31,13 @@ void SnakeWidget::drawGame(QPainter *painter) {
     QList<QPoint> snake = game.getSnake();
     QPoint pasteque = game.getPasteque();
 
-    // Cases : murs (gris) et cases visitées (gris clair)
+    // Murs (gris)
     painter->setPen(Qt::NoPen);
     for(int x=0;x<largeur;x++) {
         for(int y=0;y<hauteur;y++) {
-            int idCase = x + y * largeur;
-            QRectF cell(xMargin + x * caseSize, yMargin + y * caseSize, caseSize, caseSize);
-
             if(x == 0 || y == 0 || x == largeur - 1 || y == hauteur - 1) {
+                QRectF cell(xMargin + x * caseSize, yMargin + y * caseSize, caseSize, caseSize);
                 painter->fillRect(cell, QColor(110, 110, 120));
-            } else if(game.getCaseVisite().contains(idCase)) {
-                painter->fillRect(cell, QColor(226, 226, 230));
             }
         }
     }

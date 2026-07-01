@@ -2,7 +2,6 @@
 #define GAME_H
 
 #include <QList>
-#include <QMap>
 #include <QPoint>
 #include <QVector>
 
@@ -18,8 +17,6 @@ public:
     int getHauteur() const;
     const QList<QPoint>& getSnake() const;
     const QPoint& getPasteque() const;
-    QMap<int, int> getCaseVisite() const;
-    int getTotMouvement() const;
 
     Direction getDirection() const;
     void setDirection(const Direction& direction);   // le solveur choisit le prochain cap
@@ -39,8 +36,6 @@ private:
     QVector<char> occupe;       // grille d'occupation du serpent (1 = case occupée)
     QPoint pasteque;
     Direction direction;
-    int totMouvement;
-    QMap<int, int> caseVisite;
     bool gagne;
 
     int idx(const QPoint& p) const;

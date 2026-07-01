@@ -11,14 +11,11 @@ Game::Game(int largeur, int hauteur) {
     snake.append(QPoint(largeur / 2, hauteur / 2 + 3));
 
     occupe = QVector<char>(largeur * hauteur, 0);
-    caseVisite.clear();
     foreach(const QPoint& p, snake) {
         occupe[idx(p)] = 1;
-        caseVisite.insert(idx(p), 1);
     }
 
     direction = Game::edHaut;
-    totMouvement = 0;
     gagne = false;
 
     nextPasteque();
@@ -38,14 +35,6 @@ const QList<QPoint>& Game::getSnake() const {
 
 const QPoint& Game::getPasteque() const {
     return pasteque;
-}
-
-QMap<int, int> Game::getCaseVisite() const {
-    return caseVisite;
-}
-
-int Game::getTotMouvement() const {
-    return totMouvement;
 }
 
 Game::Direction Game::getDirection() const {
@@ -113,8 +102,6 @@ bool Game::step() {
         snake[i] = snake[i - 1];
     }
     snake[0] = newTete;
-    totMouvement++;
-    caseVisite[idx(newTete)]++;
 
     if(mangePasteque) {
         snake.append(last);           // la queue reste : le serpent grandit

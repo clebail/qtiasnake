@@ -32,20 +32,6 @@
     <item>
      <layout class="QHBoxLayout" name="statusLayout">
       <item>
-       <widget class="QLabel" name="label">
-        <property name="text">
-         <string>Mouvements</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="lblMvt">
-        <property name="text">
-         <string>0</string>
-        </property>
-       </widget>
-      </item>
-      <item>
        <spacer name="statusSpacer">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>

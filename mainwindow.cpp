@@ -22,8 +22,6 @@ void MainWindow::newGame() {
     if(showGame) {
         gameWidget->setGame(game);
     }
-
-    lblMvt->setText(QString().number(game.getTotMouvement()));
 }
 
 void MainWindow::onTimer() {
@@ -35,7 +33,6 @@ void MainWindow::onTimer() {
         if(showGame) {
             gameWidget->setGame(game);
         }
-        lblMvt->setText(QString().number(game.getTotMouvement()));
     } else {
         newGame();
     }
