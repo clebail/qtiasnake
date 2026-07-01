@@ -2,7 +2,7 @@
 
 static std::default_random_engine generator;
 static std::normal_distribution<float> distribution(0.0, MAX_POIDS);
-static std::normal_distribution<float> muteDistribution(0.0, MUTE_SIGMA);
+static std::normal_distribution<float> muteDistribution(0.0, 1.0);
 
 int Random::maxPoids = MAX_POIDS;
 
@@ -14,8 +14,8 @@ float Random::generePoid() {
     return (rand() % 1000 - 500) * maxPoids / 500.0;
 }
 
-float Random::muteNoise() {
-    return muteDistribution(generator);
+float Random::muteNoise(float sigma) {
+    return sigma * muteDistribution(generator);
 }
 
 void Random::reset() {

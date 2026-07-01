@@ -4,11 +4,14 @@
 #include <QList>
 #include <QMap>
 #include <QPoint>
+#include <QVector>
 #include "sensor.h"
 #include "reseau.h"
 
 #define NB_DIRECTION            4
 #define LIMITE_VISITE           4
+#define COUT_MOUVEMENT          20      // pénalité par pas depuis la dernière pastèque (efficacité)
+#define BONUS_EQUILIBRE         0       // bonus par virage du sens minoritaire (0 = désactivé, gameable)
 
 class Game {
 public:
@@ -53,10 +56,12 @@ public:
     int getNbCaseVisite() const;
     int getNbNeurone() const;
     QMap<int, int> getCaseVisite() const;
+    static void resetPasteques();
 private:
     int largeur;
     int hauteur;
     QList<QPoint> snake;
+    QVector<char> occupe;       // grille d'occupation du serpent (1 = case occupée)
     QList<Sensor> sensors;
     QPoint pasteque;
     int nbMouvement;

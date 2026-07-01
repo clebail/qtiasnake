@@ -10,7 +10,8 @@
 #define NB_ACCOUPLE         75
 #define NB_MUTE             75
 #define TABOU_TIME          10
-#define NB_EVAL             5
+#define NB_EVAL             1
+#define STEPS_PAR_TICK      3000    // pas traités par tic quand l'affichage est coupé
 
 class MainWindow : public QMainWindow, private Ui::MainWindow
 {
@@ -44,6 +45,7 @@ private:
     Reseau::Poids currentWeights;
 
     void newGame(const Reseau::Poids& poids = Reseau::Poids());
+    void iterate();
     QList<Reseau::Poids> fusion(bool gardeElite = true) const;
     QString getHash(const Reseau::Poids& poids) const;
     void organizeGeneration();

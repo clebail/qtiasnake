@@ -31,6 +31,11 @@ Game::Game(int largeur, int hauteur, const Reseau::Poids &poids) {
     snake.append(QPoint(largeur/2, hauteur/2 + 3));
     nbMouvement = totMouvement = 0;
 
+    occupe = QVector<char>(largeur * hauteur, 0);
+    foreach(const QPoint& p, snake) {
+        occupe[p.x() + p.y() * largeur] = 1;
+    }
+
     direction = Game::edHaut;
     queueDirection = Game::edHaut;
     nbCgtDir = 0;
@@ -104,14 +109,17 @@ bool Game::step() {
         }
 
         snake[0] = newTete;
-        nbMouvement++;       
+        occupe[idCase] = 1;              // idCase = index de newTete
+        nbMouvement++;
 
         if(type == Sensor::estPasteque) {
-            snake.append(last);
+            snake.append(last);          // la queue reste : le serpent grandit
 
             nextPasteque();
             nbMouvement = 0;
             limiteVisite += LIMITE_VISITE;
+        } else {
+            occupe[last.x() + last.y() * largeur] = 0;   // la queue libère sa case
         }
 
         if(!caseVisite.contains(idCase)) {
@@ -175,16 +183,14 @@ Game::GameResult Game::getResult() const {
 
     m /= (float)caseVisite.size();
 
-    if(turns[0] && turns[1]) {
-        t = 99 * (turns[0] + turns[1]) / qMax(turns[0], turns[1]);
-    }
+    t = BONUS_EQUILIBRE * qMin(turns[0], turns[1]);
 
     gr.poids = reseau.getPoids();
     //gr.score = (totMouvement * 10 / (nbCgtDir ?: 1)+ (snake.size() - 4) * 10000) * (perdu ? 0 : 1);
     //gr.score = ((snake.size() - 4) * 1000) * (perdu ? 0 : 1);
     //gr.score = (qMax(caseVisite.size() / m, 1.0F) + turns[0] + turns[1] + (snake.size() - 4) * 10000) * (perdu ? 0 : 1);
-    gr.scoreVisite = (t + 100 * caseVisite.size() + (snake.size() - 4) * 100000) * (perdu ? 0 : 1) * (!turns[0] || !turns[1] ? 0 : 1);
-    gr.scorePasteque =(snake.size() - 4) * (perdu ? 0 : 1) * (!turns[0] || !turns[1] ? 0 : 1);
+    gr.scoreVisite = (t + 100 * caseVisite.size() + (snake.size() - 4) * 100000) - nbMouvement * COUT_MOUVEMENT;// * (perdu ? 0 : 1) * (!turns[0] || !turns[1] ? 0 : 1);
+    gr.scorePasteque =(snake.size() - 4);// * (perdu ? 0 : 1) * (!turns[0] || !turns[1] ? 0 : 1);
 
     gr.perdu = perdu;
 
@@ -208,14 +214,8 @@ Sensor::ESensorType Game::cellFree(const QPoint& p, const Sensor::ESensorType &t
     int y = p.y();
 
     if(x > 0 && x < largeur - 1 && y > 0 && y < hauteur - 1) {
-        if(toIgnore != Sensor::estSnake) {
-            QList<QPoint>::const_iterator i;
-
-            for(i=snake.begin();i!=snake.end();++i) {
-                if((*i).x() == x && (*i).y() == y) {
-                    return Sensor::estSnake;
-                }
-            }
+        if(toIgnore != Sensor::estSnake && occupe[x + y * largeur]) {
+            return Sensor::estSnake;
         }
 
         return toIgnore != Sensor::estPasteque && p == pasteque ? Sensor::estPasteque : Sensor::estNone;
@@ -322,13 +322,17 @@ QPoint Game::newPasteque() const {
     return p;
 }
 
+void Game::resetPasteques() {
+    pasteques.clear();
+}
+
 void Game::nextPasteque() {
-    /*if(++idPasteque < pasteques.size()) {
+    if(++idPasteque < pasteques.size()) {
         pasteque = pasteques[idPasteque];
-    } else {*/
+    } else {
         pasteque = newPasteque();
-        //pasteques.append(pasteque);
-    //}
+        pasteques.append(pasteque);
+    }
 }
 
 void Game::next() {
@@ -367,7 +371,7 @@ void Game::next() {
         }
     }
 
-    // Direction de la pastèque, relative à l'orientation de la tête.
+    // Direction de la pastèque et de la queue, relatives à l'orientation de la tête.
     // Repère écran (y vers le bas) : avant = (fX, fY), droite = (-fY, fX).
     {
         int fX, fY;
@@ -377,8 +381,13 @@ void Game::next() {
         float nx = (pasteque.x() - tete.x()) / (float)(largeur - 1);
         float ny = (pasteque.y() - tete.y()) / (float)(hauteur - 1);
 
-        entrees.append(nx * fX + ny * fY);   // composante avant
-        entrees.append(nx * rX + ny * rY);   // composante droite
+        entrees.append(nx * fX + ny * fY);   // pastèque : composante avant
+        entrees.append(nx * rX + ny * rY);   // pastèque : composante droite
+
+        int qX, qY;
+        getIncs(queueDirection, qX, qY);
+        entrees.append(qX * fX + qY * fY);   // queue : composante avant
+        entrees.append(qX * rX + qY * rY);   // queue : composante droite
     }
 
     sorties = reseau.eval(entrees);
@@ -423,8 +432,8 @@ void Game::initReseau() {
     functions.append(Neurone::efSigmoide);
     functions.append(Neurone::efRelu);
 
-    reseau.addCouche(Couche(26, 24, functions[0]));
-    reseau.addCouche(Couche(24, 12, functions[1]));
+    reseau.addCouche(Couche(28, 26, functions[0]));
+    reseau.addCouche(Couche(26, 12, functions[1]));
     reseau.addCouche(Couche(12, 8, functions[2]));
     reseau.addCouche(Couche(8, 3, functions[3]));
 }

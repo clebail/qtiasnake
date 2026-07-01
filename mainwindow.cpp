@@ -50,6 +50,13 @@ QList<Reseau::Poids> MainWindow::fusion(bool gardeElite) const {
     QString hash;
     QList<QString> newGenHashs;
 
+    // Mutation décroissante : forte au début (exploration), douce ensuite
+    // (réglage fin), interpolée linéairement sur MUTE_DECAY_GEN générations.
+    float decay = qMin(1.0f, idxGeneration / (float)MUTE_DECAY_GEN);
+    int muteRate = MUTE_RATE_START + decay * (MUTE_RATE_END - MUTE_RATE_START);
+    float muteSigma = MUTE_SIGMA_START + decay * (MUTE_SIGMA_END - MUTE_SIGMA_START);
+    qDebug() << "Mutation gén" << idxGeneration << "rate" << muteRate << "sigma" << muteSigma;
+
     // On prend l'élite tel quel
     if(gardeElite) {
         for(int i=0;i<ELITE && i<generation.size();i++) {
@@ -200,8 +207,8 @@ QList<Reseau::Poids> MainWindow::fusion(bool gardeElite) const {
 
                     for(int l=0;l<lpn.size();l++) {
                         float w = lpn[l];
-                        if(rand() % 100 < MUTE_RATE) {
-                            w += Random::muteNoise();
+                        if(rand() % 100 < muteRate) {
+                            w += Random::muteNoise(muteSigma);
                         }
                         lprn.append(w);
                     }
@@ -324,7 +331,7 @@ void MainWindow::on_pbStop_clicked() {
 }
 
 void MainWindow::on_pbStep_clicked() {
-    onTimer();
+    iterate();
 }
 
 void MainWindow::on_pbStepOver_clicked() {
@@ -448,18 +455,45 @@ void MainWindow::on_pbLoad_clicked() {
                            loaded.append(poids);
                         }
 
-                        // Validation : un neurone de la 1re couche doit avoir
-                        // (nbEntree + biais) poids, sinon le fichier vient d'une
-                        // autre architecture et serait utilisé en silence à tort.
-                        int expected = game.getReseau().getCouches().first().getNbEntree() + 1;
-                        if(loaded.isEmpty() || loaded.first().isEmpty() ||
-                           loaded.first().first().isEmpty() ||
-                           loaded.first().first().first().size() != expected) {
-                            qWarning() << "Import annulé : architecture incompatible"
-                                       << "(attendu" << expected << "poids par neurone d'entrée, lu"
-                                       << (loaded.isEmpty() || loaded.first().isEmpty() || loaded.first().first().isEmpty()
-                                           ? 0 : loaded.first().first().first().size()) << ")";
+                        // Validation d'architecture complète : le fichier doit
+                        // correspondre au réseau courant couche par couche, avec une
+                        // seule tolérance — 2 entrées ajoutées à la 1re couche depuis
+                        // la sauvegarde (on migre alors avec des poids nuls).
+                        Reseau::Poids target = game.getReseau().getPoids();
+                        bool ok = !loaded.isEmpty();
+                        bool migrate = false;
+
+                        if(ok) {
+                            const Reseau::Poids& s = loaded.first();
+                            ok = (s.size() == target.size());
+                            for(int j=0; ok && j<target.size(); j++) {
+                                if(s[j].size() != target[j].size()) { ok = false; break; }  // nb neurones
+                                int sw = s[j].isEmpty() ? 0 : s[j].first().size();
+                                int tw = target[j].isEmpty() ? 0 : target[j].first().size();
+                                if(j == 0 && sw == tw - 2) {
+                                    migrate = true;                 // 2 entrées ajoutées
+                                } else if(sw != tw) {
+                                    ok = false;
+                                }
+                            }
+                        }
+
+                        if(!ok) {
+                            qWarning() << "Import annulé : architecture incompatible avec le réseau courant";
                             return;
+                        }
+
+                        if(migrate) {
+                            // Insère 2 poids nuls avant le biais de chaque neurone de
+                            // la 1re couche → réseau identique, l'évolution apprendra
+                            // ensuite à exploiter les nouvelles entrées.
+                            for(int i=0;i<loaded.size();i++) {
+                                for(int n=0;n<loaded[i][0].size();n++) {
+                                    loaded[i][0][n].insert(loaded[i][0][n].size() - 1, 0.0f);
+                                    loaded[i][0][n].insert(loaded[i][0][n].size() - 1, 0.0f);
+                                }
+                            }
+                            qDebug() << "Migration population : +2 entrées (poids nuls) sur la 1re couche";
                         }
 
                         newGeneration = loaded;
@@ -467,6 +501,7 @@ void MainWindow::on_pbLoad_clicked() {
                         idx = 0;
                         evalRun = survived = 0;
                         accScoreVisite = accScorePasteque = 0;
+                        Game::resetPasteques();
                         generation.clear();
                         poids = newGeneration.first();
                         newGame(poids);
@@ -478,13 +513,26 @@ void MainWindow::on_pbLoad_clicked() {
 }
 
 void MainWindow::onTimer() {
+    // Affichage actif : une itération par tic (on regarde jouer).
+    // Affichage coupé : gros paquet par tic, on évite le coût de la boucle
+    // d'événements Qt et des mises à jour d'UF à chaque pas.
+    int budget = showGame ? 1 : STEPS_PAR_TICK;
+
+    for(int i=0;i<budget;i++) {
+        iterate();
+        if(!timer->isActive())   // stoppé en cours (fin de génération, step-over)
+            break;
+    }
+}
+
+void MainWindow::iterate() {
     if(game.step()) {
         if(showGame) {
             gameWidget->setGame(game);
             reseauWidget->setReseau(game.getReseau());
-        }
 
-        lblMvt->setText(QString().number(game.getTotMouvement())+QString(" -- ")+QString().number(game.getNbMouvement())+QString(" / ")+QString().number(game.getMaxMouvement()));
+            lblMvt->setText(QString().number(game.getTotMouvement())+QString(" -- ")+QString().number(game.getNbMouvement())+QString(" / ")+QString().number(game.getMaxMouvement()));
+        }
     } else {
         if(over) {
             on_pbStop_clicked();
@@ -581,6 +629,7 @@ void MainWindow::onTimer() {
             evalRun = survived = 0;
             accScoreVisite = accScorePasteque = 0;
             idxGeneration++;
+            Game::resetPasteques();   // nouvelle séquence de pastèques pour la génération suivante
             if(newGeneration.size()) poids = newGeneration[idx];
             bestScoreVisiteGeneration = bestScorePastequeGeneration = 0;
 
