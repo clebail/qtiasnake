@@ -116,4 +116,4 @@ Les compteurs **Pastèques** et **Steps** se mettent à jour en bas de la fenêt
 
 ## 📜 Licence
 
-À définir par l'auteur.
+Projet personnel.
