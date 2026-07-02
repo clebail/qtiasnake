@@ -65,6 +65,25 @@ void SnakeWidget::drawGame(QPainter *painter) {
         painter->drawLine(QPointF(xMargin, py), QPointF(xMargin + largeur * caseSize, py));
     }
 
+    // Pastèque : tranche (écorce verte, chair rouge, pépins)
+    if(!pasteque.isNull()) {
+        float m2 = caseSize * 0.1;
+        QRectF r(xMargin + pasteque.x() * caseSize + m2, yMargin + pasteque.y() * caseSize + m2, caseSize - 2 * m2, caseSize - 2 * m2);
+
+        painter->setPen(Qt::NoPen);
+        painter->setBrush(QColor(40, 140, 45));
+        painter->drawEllipse(r);
+        QRectF ri = r.adjusted(r.width() * 0.16, r.height() * 0.16, -r.width() * 0.16, -r.height() * 0.16);
+        painter->setBrush(QColor(225, 55, 65));
+        painter->drawEllipse(ri);
+
+        painter->setBrush(QColorConstants::Black);
+        float sd = qMax(1.0, r.width() * 0.06);
+        painter->drawEllipse(QPointF(ri.center().x() - ri.width() * 0.15, ri.center().y() - ri.height() * 0.10), sd, sd);
+        painter->drawEllipse(QPointF(ri.center().x() + ri.width() * 0.18, ri.center().y() - ri.height() * 0.05), sd, sd);
+        painter->drawEllipse(QPointF(ri.center().x() - ri.width() * 0.02, ri.center().y() + ri.height() * 0.18), sd, sd);
+    }
+
     // Serpent : segments arrondis dégradés, queue d'abord puis tête au-dessus
     float m = caseSize * 0.12;
     float seg = caseSize - 2 * m;
@@ -112,24 +131,5 @@ void SnakeWidget::drawGame(QPainter *painter) {
             painter->drawEllipse(e1, eye * 0.5, eye * 0.5);
             painter->drawEllipse(e2, eye * 0.5, eye * 0.5);
         }
-    }
-
-    // Pastèque : tranche (écorce verte, chair rouge, pépins)
-    if(!pasteque.isNull()) {
-        float m2 = caseSize * 0.1;
-        QRectF r(xMargin + pasteque.x() * caseSize + m2, yMargin + pasteque.y() * caseSize + m2, caseSize - 2 * m2, caseSize - 2 * m2);
-
-        painter->setPen(Qt::NoPen);
-        painter->setBrush(QColor(40, 140, 45));
-        painter->drawEllipse(r);
-        QRectF ri = r.adjusted(r.width() * 0.16, r.height() * 0.16, -r.width() * 0.16, -r.height() * 0.16);
-        painter->setBrush(QColor(225, 55, 65));
-        painter->drawEllipse(ri);
-
-        painter->setBrush(QColorConstants::Black);
-        float sd = qMax(1.0, r.width() * 0.06);
-        painter->drawEllipse(QPointF(ri.center().x() - ri.width() * 0.15, ri.center().y() - ri.height() * 0.10), sd, sd);
-        painter->drawEllipse(QPointF(ri.center().x() + ri.width() * 0.18, ri.center().y() - ri.height() * 0.05), sd, sd);
-        painter->drawEllipse(QPointF(ri.center().x() - ri.width() * 0.02, ri.center().y() + ri.height() * 0.18), sd, sd);
     }
 }

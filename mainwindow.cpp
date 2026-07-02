@@ -18,7 +18,7 @@ MainWindow::~MainWindow() {
 }
 
 void MainWindow::newGame() {
-    game = Game(22, 22);
+    game = Game(32, 32);
     solver = Solver(&game);
     stepCount = 0;
 
