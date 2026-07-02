@@ -17,6 +17,7 @@ public:
     int getHauteur() const;
     const QList<QPoint>& getSnake() const;
     const QPoint& getPasteque() const;
+    const QPoint& getQueue() const;
 
     Direction getDirection() const;
     void setDirection(const Direction& direction);   // le solveur choisit le prochain cap

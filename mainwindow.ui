@@ -32,6 +32,20 @@
     <item>
      <layout class="QHBoxLayout" name="statusLayout">
       <item>
+       <widget class="QLabel" name="lblPasteque">
+        <property name="text">
+         <string>Pasteques : 0</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="lblStep">
+        <property name="text">
+         <string>Steps : 0</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <spacer name="statusSpacer">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>

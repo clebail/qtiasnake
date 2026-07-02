@@ -5,6 +5,7 @@
 #include <QTimer>
 #include "ui_mainwindow.h"
 #include "game.h"
+#include "solver.h"
 
 class MainWindow : public QMainWindow, private Ui::MainWindow
 {
@@ -16,10 +17,13 @@ public:
 
 private:
     Game game;
+    Solver solver;
     QTimer *timer;
     bool showGame;
+    int stepCount;
 
     void newGame();
+    void updateCounters();
 
 private slots:
     void on_pbStart_clicked();

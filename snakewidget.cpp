@@ -69,16 +69,25 @@ void SnakeWidget::drawGame(QPainter *painter) {
     float m = caseSize * 0.12;
     float seg = caseSize - 2 * m;
     float radius = seg * 0.35;
-    for(int k = snake.size() - 1; k >= 0; k--) {
+    int n = snake.size();
+    for(int k = n - 1; k >= 0; k--) {
         QPoint p = snake[k];
         QRectF r(xMargin + p.x() * caseSize + m, yMargin + p.y() * caseSize + m, seg, seg);
         bool head = (k == 0);
 
-        QLinearGradient g(r.topLeft(), r.bottomRight());
-        g.setColorAt(0, head ? QColor(45, 170, 65) : QColor(65, 195, 85));
-        g.setColorAt(1, head ? QColor(20, 110, 40) : QColor(30, 140, 55));
+        // Couleur propre à chaque segment : dégradé de teinte de la tête à la queue.
+        // L'index de chaque case changeant à chaque pas, le dégradé "défile" le long
+        // du corps et donne l'impression du déplacement.
+        float t = (n > 1) ? (float)k / (float)(n - 1) : 0.0f;
+        int hue = (int)(t * 300.0f) % 360;
+        QColor clair = QColor::fromHsv(hue, 200, 235);
+        QColor fonce = QColor::fromHsv(hue, 220, 150);
 
-        painter->setPen(QPen(QColor(20, 90, 35), 1));
+        QLinearGradient g(r.topLeft(), r.bottomRight());
+        g.setColorAt(0, clair);
+        g.setColorAt(1, fonce);
+
+        painter->setPen(QPen(fonce.darker(130), 1));
         painter->setBrush(g);
         painter->drawRoundedRect(r, radius, radius);
 

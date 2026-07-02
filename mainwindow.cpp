@@ -1,3 +1,4 @@
+#include <QMessageBox>
 #include "mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
@@ -18,23 +19,59 @@ MainWindow::~MainWindow() {
 
 void MainWindow::newGame() {
     game = Game(22, 22);
+    solver = Solver(&game);
+    stepCount = 0;
 
     if(showGame) {
         gameWidget->setGame(game);
     }
+    updateCounters();
+}
+
+void MainWindow::updateCounters() {
+    int pasteques = game.getSnake().size() - 4;   // 4 = taille initiale du serpent
+    lblPasteque->setText(QString("Pasteques : %1").arg(pasteques));
+    lblStep->setText(QString("Steps : %1").arg(stepCount));
 }
 
 void MainWindow::onTimer() {
-    // TODO : brancher ici le solveur A*/hamiltonien.
-    //   Il devra calculer le prochain cap et appeler game.setDirection(...)
-    //   avant game.step(). Pour l'instant le serpent avance tout droit.
+    game.setDirection(solver.next());
 
-    if(game.step()) {
+    bool alive = game.step();
+
+    if(game.estGagne()) {
+        // Plateau plein : on fige l'affichage et on annonce le score.
+        stepCount++;
         if(showGame) {
             gameWidget->setGame(game);
         }
+        updateCounters();
+
+        timer->stop();
+        pbStep->setEnabled(true);
+
+        int pasteques = game.getSnake().size() - 4;
+        QMessageBox::information(this, "Victoire",
+            QString("Termine ! %1 pasteques mangees en %2 steps.")
+                .arg(pasteques).arg(stepCount));
+        return;
+    }
+
+    if(alive) {
+        stepCount++;
+        if(showGame) {
+            gameWidget->setGame(game);
+        }
+        updateCounters();
     } else {
-        newGame();
+        // Mort : on fige l'état au lieu de redémarrer, pour inspecter le cas.
+        if(showGame) {
+            gameWidget->setGame(game);
+        }
+        updateCounters();
+
+        timer->stop();
+        pbStep->setEnabled(true);
     }
 }
 

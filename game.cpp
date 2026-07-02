@@ -5,10 +5,10 @@ Game::Game(int largeur, int hauteur) {
     this->largeur = largeur;
     this->hauteur = hauteur;
 
-    snake.append(QPoint(largeur / 2, hauteur / 2));
-    snake.append(QPoint(largeur / 2, hauteur / 2 + 1));
-    snake.append(QPoint(largeur / 2, hauteur / 2 + 2));
-    snake.append(QPoint(largeur / 2, hauteur / 2 + 3));
+    snake.append(QPoint(11, hauteur / 2));
+    snake.append(QPoint(11, hauteur / 2 + 1));
+    snake.append(QPoint(11, hauteur / 2 + 2));
+    snake.append(QPoint(11, hauteur / 2 + 3));
 
     occupe = QVector<char>(largeur * hauteur, 0);
     foreach(const QPoint& p, snake) {
@@ -35,6 +35,10 @@ const QList<QPoint>& Game::getSnake() const {
 
 const QPoint& Game::getPasteque() const {
     return pasteque;
+}
+
+const QPoint& Game::getQueue() const {
+    return snake.last();
 }
 
 Game::Direction Game::getDirection() const {
