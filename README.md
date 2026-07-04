@@ -5,6 +5,11 @@ Un jeu de **Snake** en **C++ / Qt5** qui se joue tout seul : une IA remplit le p
 **raccourcis le long du cycle** (vitesse). Le serpent est rendu en dégradé arc-en-ciel
 qui « défile » et donne l'impression du mouvement.
 
+Et surtout : en chargeant une image, le serpent **reconstitue cette image** case par case en
+remplissant le plateau. 🎨
+
+▶️ **Vidéo de démonstration : https://youtu.be/yIlmqoJil5I**
+
 <p align="center">
   <img src="docs/screenshot.png" alt="qtiasnake en action" width="520">
 </p>
@@ -25,6 +30,37 @@ qui « défile » et donne l'impression du mouvement.
   (pour laisser tourner l'IA à pleine vitesse).
 - **Fins de partie propres** : message de victoire quand le plateau est plein, gel de
   l'affichage en cas de mort pour inspecter la situation.
+- **Génération d'image** : charge n'importe quelle image et le serpent la **reconstitue** en
+  remplissant le plateau ; rejeu déterministe et export des frames pour en faire une vidéo.
+
+---
+
+## 🎨 Génération d'image
+
+Au-delà de « juste gagner », le solveur peut **peindre une image** : chaque case du plateau
+prend la couleur du pixel correspondant de l'image chargée. Quand l'IA a rempli tout le
+plateau, l'image apparaît — reconstituée par le parcours du serpent.
+
+Le tout se pilote depuis le menu **Fichier** :
+
+- **Charger une image** — l'image devient l'objectif ; le plateau est redimensionné à ses
+  dimensions et l'IA joue jusqu'à la remplir. À la victoire, la partie est **sauvegardée**
+  dans un fichier `.sna` (séquence de pastèques + couleurs du serpent).
+- **Charger un jeu** — recharge un `.sna` et **rejoue la partie à l'identique** (le jeu est
+  déterministe : la même séquence de pastèques reproduit exactement le même tracé, et donc la
+  même image).
+
+### 🎬 Export vidéo
+
+La case **Générer images** écrit **une image PNG par pas** dans un dossier `frames/`
+(rendu hors-écran à taille fixe, indépendant de l'affichage). On assemble ensuite la vidéo
+avec ffmpeg :
+
+```bash
+ffmpeg -framerate 15 -i frames/frame_%06d.png -c:v libx264 -pix_fmt yuv420p -crf 18 out.mp4
+```
+
+Le résultat en vidéo : **https://youtu.be/yIlmqoJil5I**
 
 ---
 
@@ -89,6 +125,9 @@ Ou ouvre `qtiasnake.pro` dans **Qt Creator** et lance (Ctrl+R).
 | **Step**            | Avance d'un seul pas                                         |
 | **Interval** + **Set** | Règle la vitesse (ms entre deux pas)                     |
 | **Afficher le jeu** | Décoche pour tourner sans rendu (IA à vitesse maximale)      |
+| **Générer images**  | Pratique pour créer une vidéo :)                             |
+| Menu **Fichier → Charger une image** | Reconstitue une image en remplissant le plateau |
+| Menu **Fichier → Charger un jeu**    | Rejoue une partie sauvegardée (`.sna`)          |
 
 Les compteurs **Pastèques** et **Steps** se mettent à jour en bas de la fenêtre.
 
