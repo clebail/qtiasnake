@@ -4,6 +4,7 @@
 #include <QList>
 #include <QPoint>
 #include <QVector>
+#include <QColor>
 
 #define NB_DIRECTION            4
 
@@ -11,7 +12,7 @@ class Game {
 public:
     typedef enum { edHaut = 0, edDroite = 1, edBas = 2, edGauche = 3 } Direction;
 
-    Game(int largeur = 22, int hauteur = 22);
+    Game(int largeur = 22, int hauteur = 22, QList<QPoint> pasteques = QList<QPoint>(), QList<QColor> snakeColors = QList<QColor>());
 
     int getLargeur() const;
     int getHauteur() const;
@@ -29,7 +30,10 @@ public:
     bool estGagne() const;                            // le serpent remplit le plateau
 
     void getIncs(const Direction& direction, int& incX, int& incY) const;
-
+    const QList<QPoint> getPasteques() const;
+    void setPasteques(const QList<QPoint>& pasteques);
+    void setSnakeColors(const QList<QColor>& snakeColors);
+    const QList<QColor> getSnakeColors() const;
 private:
     int largeur;
     int hauteur;
@@ -38,9 +42,12 @@ private:
     QPoint pasteque;
     Direction direction;
     bool gagne;
+    QList<QPoint> pasteques;
+    int currentPasteque;
+    QList<QColor> snakeColors;
 
     int idx(const QPoint& p) const;
-    QPoint newPasteque() const;
+    QPoint newPasteque();
     void nextPasteque();
 };
 

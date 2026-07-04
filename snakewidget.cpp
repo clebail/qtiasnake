@@ -15,19 +15,32 @@ void SnakeWidget::paintEvent(QPaintEvent *) {
     painter.setBrush(QColorConstants::White);
     painter.drawRect(QRect(0, 0, width() - 1, height() - 1));
 
-    drawGame(&painter);
+    drawGame(&painter, game, width(), height());
 }
 
-void SnakeWidget::drawGame(QPainter *painter) {
+QImage SnakeWidget::renderFrame(const Game& game, int w, int h) {
+    QImage img(w, h, QImage::Format_RGB32);
+
+    QPainter painter(&img);
+    painter.setPen(QColorConstants::Black);
+    painter.setBrush(QColorConstants::White);
+    painter.drawRect(QRect(0, 0, w - 1, h - 1));
+
+    drawGame(&painter, game, w, h);
+
+    return img;
+}
+
+void SnakeWidget::drawGame(QPainter *painter, const Game& game, int w, int h) {
     painter->setRenderHint(QPainter::Antialiasing, true);
 
     int largeur = game.getLargeur();
     int hauteur = game.getHauteur();
-    float caseWidth = (float)width() / (float)largeur;
-    float caseHeight = (float)height() / (float)hauteur;
+    float caseWidth = (float)w / (float)largeur;
+    float caseHeight = (float)h / (float)hauteur;
     float caseSize = qMin(caseWidth, caseHeight);
-    float xMargin = ((float)width() - (float)(caseSize * largeur)) / 2.0;
-    float yMargin = ((float)height() - (float)(caseSize * hauteur)) / 2.0;
+    float xMargin = ((float)w - (float)(caseSize * largeur)) / 2.0;
+    float yMargin = ((float)h - (float)(caseSize * hauteur)) / 2.0;
     QList<QPoint> snake = game.getSnake();
     QPoint pasteque = game.getPasteque();
 
@@ -89,26 +102,33 @@ void SnakeWidget::drawGame(QPainter *painter) {
     float seg = caseSize - 2 * m;
     float radius = seg * 0.35;
     int n = snake.size();
+    QList<QColor> snakeColors = game.getSnakeColors();
     for(int k = n - 1; k >= 0; k--) {
         QPoint p = snake[k];
         QRectF r(xMargin + p.x() * caseSize + m, yMargin + p.y() * caseSize + m, seg, seg);
         bool head = (k == 0);
 
-        // Couleur propre à chaque segment : dégradé de teinte de la tête à la queue.
-        // L'index de chaque case changeant à chaque pas, le dégradé "défile" le long
-        // du corps et donne l'impression du déplacement.
-        float t = (n > 1) ? (float)k / (float)(n - 1) : 0.0f;
-        int hue = (int)(t * 300.0f) % 360;
-        QColor clair = QColor::fromHsv(hue, 200, 235);
-        QColor fonce = QColor::fromHsv(hue, 220, 150);
+        if(k < snakeColors.size()) {
+            painter->setPen(QPen(QColor(200, 200, 200)));
+            painter->setBrush(QBrush(snakeColors.at(k)));
+            painter->drawRoundedRect(r, radius, radius);
+        } else {
+            // Couleur propre à chaque segment : dégradé de teinte de la tête à la queue.
+            // L'index de chaque case changeant à chaque pas, le dégradé "défile" le long
+            // du corps et donne l'impression du déplacement.
+            float t = (n > 1) ? (float)k / (float)(n - 1) : 0.0f;
+            int hue = (int)(t * 300.0f) % 360;
+            QColor clair = QColor::fromHsv(hue, 200, 235);
+            QColor fonce = QColor::fromHsv(hue, 220, 150);
 
-        QLinearGradient g(r.topLeft(), r.bottomRight());
-        g.setColorAt(0, clair);
-        g.setColorAt(1, fonce);
+            QLinearGradient g(r.topLeft(), r.bottomRight());
+            g.setColorAt(0, clair);
+            g.setColorAt(1, fonce);
 
-        painter->setPen(QPen(fonce.darker(130), 1));
-        painter->setBrush(g);
-        painter->drawRoundedRect(r, radius, radius);
+            painter->setPen(QPen(fonce.darker(130), 1));
+            painter->setBrush(g);
+            painter->drawRoundedRect(r, radius, radius);
+        }
 
         if(head) {
             int dx = 0, dy = -1;

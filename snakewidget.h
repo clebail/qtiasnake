@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QPainter>
+#include <QImage>
 #include "game.h"
 
 class SnakeWidget : public QWidget
@@ -11,6 +12,8 @@ class SnakeWidget : public QWidget
 public:
     explicit SnakeWidget(QWidget *parent = nullptr);
     void setGame(const Game& game);
+    // Rendu hors-ecran d'un etat de jeu, a taille fixe (pour l'export video).
+    QImage renderFrame(const Game& game, int w, int h);
 
 protected:
     virtual void paintEvent(QPaintEvent *);
@@ -18,7 +21,7 @@ protected:
 private:
     Game game;
 
-    void drawGame(QPainter *painter);
+    void drawGame(QPainter *painter, const Game& game, int w, int h);
 };
 
 #endif // SNAKEWIDGET_H

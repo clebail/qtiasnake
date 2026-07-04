@@ -1,7 +1,7 @@
 #include <cstdlib>
 #include "game.h"
 
-Game::Game(int largeur, int hauteur) {
+Game::Game(int largeur, int hauteur, QList<QPoint> pasteques, QList<QColor> snakeColors) {
     this->largeur = largeur;
     this->hauteur = hauteur;
 
@@ -18,6 +18,10 @@ Game::Game(int largeur, int hauteur) {
     direction = Game::edHaut;
     gagne = false;
 
+    setPasteques(pasteques);
+    setSnakeColors(snakeColors);
+
+    currentPasteque = -1;
     nextPasteque();
 }
 
@@ -125,15 +129,39 @@ bool Game::step() {
     return true;
 }
 
-QPoint Game::newPasteque() const {
+QPoint Game::newPasteque() {
     QPoint p;
     do {
         p = QPoint(rand() % (largeur - 2) + 1, rand() % (hauteur - 2) + 1);
     } while(occupe[idx(p)] != 0);
 
+    pasteques.append(p);
+
     return p;
 }
 
 void Game::nextPasteque() {
-    pasteque = newPasteque();
+    currentPasteque++;
+
+    if(currentPasteque < pasteques.size()) {
+        pasteque = pasteques.at(currentPasteque);
+    } else {
+        pasteque = newPasteque();
+    }
+}
+
+const QList<QPoint> Game::getPasteques() const {
+    return pasteques;
+}
+
+void Game::setPasteques(const QList<QPoint>& pasteques) {
+    this->pasteques = QList<QPoint>(pasteques);
+}
+
+void Game::setSnakeColors(const QList<QColor>& snakeColors) {
+    this->snakeColors = QList<QColor>(snakeColors);
+}
+
+const QList<QColor> Game::getSnakeColors() const {
+    return snakeColors;
 }
